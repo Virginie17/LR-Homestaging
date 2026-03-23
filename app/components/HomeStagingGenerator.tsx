@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { supabase } from '@/lib/supabase'
 
 export default function HomeStagingGenerator() {
   const [file, setFile] = useState<File | null>(null)
@@ -18,48 +19,63 @@ export default function HomeStagingGenerator() {
     setError(null)
 
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session?.access_token) {
+        throw new Error('Connectez-vous d’abord pour utiliser vos crédits.')
+      }
+
       const formData = new FormData()
       formData.append('file', file)
 
       const res = await fetch('/api/generate', {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: formData,
       })
 
-      if (!res.ok) throw new Error('Erreur génération')
-
       const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data?.error || 'Erreur génération')
+      }
+
       setResult(data.imageUrl)
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || 'Erreur serveur')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="mt-10 p-6 border rounded-xl">
+    <div className="mt-10 p-6 border rounded-xl bg-white text-black">
       <div className="mb-4">
         <strong className="block">Qualité Premium — rendu photo professionnel</strong>
         <div className="text-sm text-gray-600 mt-1">
-          Starter: 9€ — Pro: 29€ — Business: 79€
+          1 crédit consommé par génération
         </div>
       </div>
-      <label htmlFor="home-file" className="block text-sm mb-2">Photo à transformer</label>
+
+      <label htmlFor="home-file" className="block text-sm mb-2">
+        Photo à transformer
+      </label>
+
       <input
         id="home-file"
         type="file"
         accept="image/*"
         onChange={(e) => setFile(e.target.files?.[0] || null)}
-        aria-describedby="home-file-desc"
       />
-      <p id="home-file-desc" className="sr-only">Téléversez une photo du bien (jpg, png). Taille recommandée 1024×768.</p>
 
       <button
         type="button"
         onClick={handleUpload}
         className="mt-4 px-4 py-2 bg-black text-white rounded"
-        aria-busy={loading}
         disabled={loading}
       >
         {loading ? 'Génération...' : 'Générer mon home staging'}
@@ -74,12 +90,12 @@ export default function HomeStagingGenerator() {
         </div>
       )}
 
-      {error && <p className="text-red-500 mt-2" role="alert">{error}</p>}
+      {error && <p className="text-red-500 mt-2">{error}</p>}
 
       {result && file && (
-        <div className="grid grid-cols-2 gap-4 mt-6" role="region" aria-label="Avant et après">
-          <img src={URL.createObjectURL(file)} alt="Photo avant home staging" />
-          <img src={result} alt="Photo après home staging" />
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          <img src={URL.createObjectURL(file)} alt="Avant" className="rounded-lg" />
+          <img src={result} alt="Après" className="rounded-lg" />
         </div>
       )}
     </div>

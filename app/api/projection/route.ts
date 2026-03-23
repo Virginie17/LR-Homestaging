@@ -22,17 +22,18 @@ export async function POST(req: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { error: "Vous devez être connecté pour générer une image." },
+        { error: "Vous devez être connecté pour générer une projection." },
         { status: 401 }
       );
     }
 
     const formData = await req.formData();
-    const file = formData.get("file") as File | null;
+    const room = formData.get("room") as File | null;
+    const furniture = formData.getAll("furniture") as File[];
 
-    if (!file) {
+    if (!room) {
       return NextResponse.json(
-        { error: "Aucune image reçue." },
+        { error: "La photo du bien est obligatoire." },
         { status: 400 }
       );
     }
@@ -53,8 +54,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const bytes = await file.arrayBuffer();
-    const base64 = Buffer.from(bytes).toString("base64");
+    const roomBase64 = Buffer.from(await room.arrayBuffer()).toString("base64");
+    const furnitureBase64 = await Promise.all(
+      furniture.map(async (file) =>
+        Buffer.from(await file.arrayBuffer()).toString("base64")
+      )
+    );
 
     const blinkResponse = await fetch("https://api.blink.ai/generate", {
       method: "POST",
@@ -63,15 +68,15 @@ export async function POST(req: NextRequest) {
         Authorization: `Bearer ${process.env.BLINK_API_KEY}`,
       },
       body: JSON.stringify({
-        image: base64,
+        room_image: roomBase64,
+        furniture_images: furnitureBase64,
         prompt: `
-Ultra photorealistic interior home staging.
-Preserve original room structure and perspective.
-Add high-end modern furniture with perfect scale and proportions.
-Natural lighting, soft shadows, realistic materials (wood, fabric, glass).
-Professional real estate photography style.
-No distortion, no artificial look, no overdesign.
-Make the space warm, elegant, and highly attractive for buyers.
+Insert the provided furniture into the room.
+Respect exact proportions and perspective.
+Do not change room structure.
+Place furniture naturally and realistically.
+Match lighting, shadows and materials.
+Ultra photorealistic real estate rendering.
         `,
         quality: "high",
         steps: 40,
@@ -81,7 +86,7 @@ Make the space warm, elegant, and highly attractive for buyers.
 
     if (!blinkResponse.ok) {
       return NextResponse.json(
-        { error: "Erreur côté moteur de génération." },
+        { error: "Erreur côté moteur de projection." },
         { status: 502 }
       );
     }
@@ -92,7 +97,7 @@ Make the space warm, elegant, and highly attractive for buyers.
       imageUrl: data.output_url,
     });
   } catch (error) {
-    console.error("generate route error", error);
+    console.error("projection route error", error);
     return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import React from "react";
 import Image from "next/image";
 import HomeStagingGenerator from './components/HomeStagingGenerator'
 import StripeCheckoutButton from './components/StripeCheckoutButton'
+import ProjectionGenerator from "./components/ProjectionGenerator";
 import CreditsBalance from './components/CreditsBalance'
 import CookieConsent from './components/CookieConsent'
 // import { supabase } from "../lib/supabase";
@@ -98,37 +99,20 @@ export default function LRHomeStaging() {
       </section>
 
       {/* OFFRES */}
-      <section id="offres" className="py-16 bg-gray-100">
-        <div className="text-center mb-8">
-          <div className="inline-block bg-red-600 text-white px-4 py-2 rounded-lg font-bold mb-4">
-            🔥 OFFRE LANCEMENT -50% pour les 3 premiers biens
-          </div>
-        </div>
-        <h2 className="text-3xl font-bold text-center mb-10">Nos Offres</h2>
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto px-6">
-          {[
-            { title: "Audit Express", price: "99€", original: "199€", badge: "PLUS POPULAIRE" },
-            { title: "Transformation", price: "690€", original: "1390€", badge: "RECOMMANDÉ" },
-            { title: "Premium", price: "1490€", original: "2990€", badge: "MEILLEUR VALEUR" }
-          ].map((offer, i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl shadow text-center relative">
-              {offer.badge && (
-                <div className="absolute -top-3 -right-3 bg-yellow-500 text-black text-xs px-2 py-1 rounded-full font-bold">
-                  {offer.badge}
-                </div>
-              )}
-              <h3 className="text-xl font-semibold mb-4">{offer.title}</h3>
-              <div className="mb-4">
-                <span className="text-gray-400 line-through text-sm">{offer.original}</span>
-                <p className="text-3xl font-bold text-red-600">{offer.price}</p>
-              </div>
-              <a href="#form" onClick={() => trackEvent('offer_click', { offer: offer.title })}>
-                <button className="bg-black text-white px-4 py-2 rounded-lg w-full">Choisir</button>
-              </a>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div className="max-w-md mx-auto mt-6 space-y-3">
+  <StripeCheckoutButton
+    priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID || ""}
+    label="Acheter 10 crédits — 9€"
+  />
+  <StripeCheckoutButton
+    priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID || ""}
+    label="Acheter 30 crédits — 19€"
+  />
+  <StripeCheckoutButton
+    priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID || ""}
+    label="Acheter 100 crédits — 49€"
+  />
+</div>
 
       {/* IMPACT */}
       <section className="py-16 bg-black text-white text-center">
@@ -192,6 +176,9 @@ export default function LRHomeStaging() {
       </p>
 
       {/* SECTION PROJECTION OPTIMISÉE */}
+      <div className="max-w-4xl mx-auto mt-8">
+  <ProjectionGenerator />
+</div>
       <section className="py-16 px-6 bg-black text-white text-center">
         <h2 className="text-3xl font-bold mb-4">
           Et si vous pouviez vous projeter avant même de visiter ?

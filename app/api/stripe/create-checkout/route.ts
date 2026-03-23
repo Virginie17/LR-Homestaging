@@ -1,33 +1,61 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', { apiVersion: '2022-11-15' })
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+function getBaseUrl() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  if (baseUrl) return baseUrl;
+
+  const vercelUrl = process.env.VERCEL_URL;
+  if (vercelUrl) return `https://${vercelUrl}`;
+
+  return "http://localhost:3000";
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const { priceId, email } = body
+    const body = await req.json();
+    const { priceId, email, userId } = body;
 
-    if (!priceId || !email) {
-      return NextResponse.json({ error: 'priceId and email required' }, { status: 400 })
+    if (!priceId) {
+      return NextResponse.json(
+        { error: "priceId requis." },
+        { status: 400 }
+      );
     }
 
-    // Build base url
-    const host = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_VERCEL_URL
-    const baseUrl = host ? `https://${host}` : 'http://localhost:3000'
+    if (!email) {
+      return NextResponse.json(
+        { error: "email requis." },
+        { status: 400 }
+      );
+    }
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'payment',
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${baseUrl}/?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/?canceled=true`,
-      metadata: { email, priceId },
-    })
+      mode: "payment",
+      customer_email: email,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      success_url: `${getBaseUrl()}/?checkout=success`,
+      cancel_url: `${getBaseUrl()}/?checkout=cancel`,
+      metadata: {
+        email,
+        userId: userId || "",
+        priceId,
+      },
+    });
 
-    return NextResponse.json({ url: session.url })
-  } catch (err) {
-    console.error('create-checkout error', err)
-    return NextResponse.json({ error: 'server error' }, { status: 500 })
+    return NextResponse.json({ url: session.url });
+  } catch (error) {
+    console.error("create checkout error", error);
+    return NextResponse.json(
+      { error: "Impossible de créer la session Stripe." },
+      { status: 500 }
+    );
   }
 }

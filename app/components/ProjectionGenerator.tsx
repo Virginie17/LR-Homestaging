@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from 'react'
+import { useState } from "react"
+import { supabase } from "@/lib/supabase"
 
 export default function ProjectionGenerator() {
   const [room, setRoom] = useState<File | null>(null)
@@ -11,7 +12,7 @@ export default function ProjectionGenerator() {
 
   const handleGenerate = async () => {
     if (!room) {
-      setError('Veuillez sélectionner la photo du bien')
+      setError("Veuillez sélectionner la photo du bien")
       return
     }
 
@@ -19,24 +20,38 @@ export default function ProjectionGenerator() {
     setError(null)
 
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (!session?.access_token) {
+        throw new Error("Connectez-vous d’abord pour utiliser vos crédits.")
+      }
+
       const formData = new FormData()
-      formData.append('room', room)
+      formData.append("room", room)
 
       furniture.forEach((file) => {
-        formData.append('furniture', file)
+        formData.append("furniture", file)
       })
 
-      const res = await fetch('/api/projection', {
-        method: 'POST',
+      const res = await fetch("/api/projection", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: formData,
       })
 
-      if (!res.ok) throw new Error('Erreur génération')
-
       const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Erreur génération")
+      }
+
       setResult(data.imageUrl)
     } catch (err: any) {
-      setError(err.message || 'Erreur serveur')
+      setError(err.message || "Erreur serveur")
     } finally {
       setLoading(false)
     }
@@ -46,16 +61,14 @@ export default function ProjectionGenerator() {
     <div className="mt-10 p-6 border rounded-xl bg-white text-black">
       <p className="font-semibold">1. Photo du bien</p>
       <input
-        aria-label="Photo du bien"
         type="file"
         accept="image/*"
         onChange={(e) => setRoom(e.target.files?.[0] || null)}
         className="w-full p-2 my-2"
       />
 
-      <p className="mt-4 font-semibold">2. Vos meubles (plusieurs)</p>
+      <p className="mt-4 font-semibold">2. Vos meubles</p>
       <input
-        aria-label="Photos des meubles"
         type="file"
         accept="image/*"
         multiple
@@ -64,24 +77,25 @@ export default function ProjectionGenerator() {
       />
 
       <button
+        type="button"
         onClick={handleGenerate}
         className="mt-4 px-4 py-2 bg-black text-white rounded"
         disabled={loading}
       >
-        {loading ? 'Projection...' : 'Créer ma projection'}
+        {loading ? "Projection..." : "Créer ma projection"}
       </button>
 
       {loading && (
         <div className="mt-3">
-          <p className="text-sm text-gray-600">Génération premium — 20–40 secondes</p>
+          <p className="text-sm text-gray-600">Génération premium — 20 à 40 secondes</p>
           <div className="animate-pulse h-56 bg-gray-100 rounded-lg mt-3" />
         </div>
       )}
 
-      {error && <p className="text-red-500 mt-2" role="alert">{error}</p>}
+      {error && <p className="text-red-500 mt-2">{error}</p>}
 
       {result && (
-        <img src={result} alt="Projection" className="mt-6 rounded-lg w-full object-cover" />
+        <img src={result} alt="Projection générée" className="mt-6 rounded-lg w-full object-cover" />
       )}
     </div>
   )

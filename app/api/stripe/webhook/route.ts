@@ -1,58 +1,96 @@
-import { NextRequest, NextResponse } from 'next/server'
-import Stripe from 'stripe'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest, NextResponse } from "next/server";
+import Stripe from "stripe";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', { apiVersion: '2022-11-15' })
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || ''
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const SUPABASE_SERVICE_ROLE = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SERVICE_ROLE_KEY || ''
-const supa = SUPABASE_URL && SUPABASE_SERVICE_ROLE ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE) : null
+function getCreditsForPrice(priceId: string) {
+  const starterId = process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID;
+  const proId = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID;
+  const businessId = process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID;
+
+  if (priceId === starterId) return Number(process.env.STARTER_CREDITS || 10);
+  if (priceId === proId) return Number(process.env.PRO_CREDITS || 30);
+  if (priceId === businessId) return Number(process.env.BUSINESS_CREDITS || 100);
+
+  return 0;
+}
 
 export async function POST(req: NextRequest) {
-  const buf = Buffer.from(await req.arrayBuffer())
-  const sig = req.headers.get('stripe-signature') || ''
-
-  let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(buf, sig, webhookSecret)
-  } catch (err: any) {
-    console.error('Webhook signature verification failed.', err.message)
-    return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
-  }
+    const signature = req.headers.get("stripe-signature");
+    if (!signature) {
+      return NextResponse.json(
+        { error: "Signature Stripe manquante." },
+        { status: 400 }
+      );
+    }
 
-  // Handle the checkout session completed event
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session
-    const email = session.metadata?.email
-    const priceId = session.metadata?.priceId
+    const body = await req.text();
 
-    if (email && supa) {
-      // Map Stripe price IDs to credits. Set env vars STRIPE_PRICE_*_ID or use defaults.
-      const priceToCredits: Record<string, number> = {
-        [process.env.STRIPE_PRICE_STARTER_ID || 'starter']: Number(process.env.STARTER_CREDITS || 1),
-        [process.env.STRIPE_PRICE_PRO_ID || 'pro']: Number(process.env.PRO_CREDITS || 5),
-        [process.env.STRIPE_PRICE_BUSINESS_ID || 'business']: Number(process.env.BUSINESS_CREDITS || 20),
+    const event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
+
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session;
+
+      const userId = session.metadata?.userId || "";
+      const email = session.metadata?.email || "";
+      const priceId = session.metadata?.priceId || "";
+
+      const creditsToAdd = getCreditsForPrice(priceId);
+
+      if (creditsToAdd <= 0) {
+        return NextResponse.json({ received: true });
       }
 
-      const creditsToAdd = priceId && priceToCredits[priceId] ? priceToCredits[priceId] : Number(process.env.DEFAULT_CREDITS || 1)
+      if (userId) {
+        const { data: existingUser } = await supabaseAdmin
+          .from("users")
+          .select("id, credits")
+          .eq("id", userId)
+          .single();
 
-      try {
-        const { data, error } = await supa.from('users').select('id,credits').eq('email', email).single()
-        if (error && error.code !== 'PGRST116') {
-          console.warn('Supabase select error', error)
-        }
+        if (existingUser) {
+          await supabaseAdmin
+            .from("users")
+            .update({
+              credits: (existingUser.credits || 0) + creditsToAdd,
+              stripe_customer_id: session.customer?.toString() || null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", userId);
 
-        if (data) {
-          await supa.from('users').update({ credits: (data.credits || 0) + creditsToAdd }).eq('id', data.id)
-        } else {
-          await supa.from('users').insert({ email, credits: creditsToAdd })
+          return NextResponse.json({ received: true });
         }
-      } catch (err) {
-        console.error('Error updating credits in Supabase', err)
+      }
+
+      if (email) {
+        const { data: existingByEmail } = await supabaseAdmin
+          .from("users")
+          .select("id, credits")
+          .eq("email", email)
+          .single();
+
+        if (existingByEmail) {
+          await supabaseAdmin
+            .from("users")
+            .update({
+              credits: (existingByEmail.credits || 0) + creditsToAdd,
+              stripe_customer_id: session.customer?.toString() || null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", existingByEmail.id);
+        }
       }
     }
-  }
 
-  return NextResponse.json({ received: true })
+    return NextResponse.json({ received: true });
+  } catch (error) {
+    console.error("stripe webhook error", error);
+    return NextResponse.json({ error: "Webhook Stripe invalide." }, { status: 400 });
+  }
 }
