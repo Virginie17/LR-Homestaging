@@ -3,8 +3,12 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 
 async function getAuthenticatedUser(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
-  const token = authHeader?.replace("Bearer ", "");
 
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+
+  const token = authHeader.replace("Bearer ", "").trim();
   if (!token) return null;
 
   const {
@@ -16,8 +20,71 @@ async function getAuthenticatedUser(req: NextRequest) {
   return user;
 }
 
+async function refundCredit(userId: string) {
+  const { data: existingUser } = await supabaseAdmin
+    .from("users")
+    .select("credits")
+    .eq("id", userId)
+    .single();
+
+  if (!existingUser) return;
+
+  await supabaseAdmin
+    .from("users")
+    .update({ credits: (existingUser.credits || 0) + 1 })
+    .eq("id", userId);
+}
+
+function extractImageUrl(output: unknown): string | null {
+  if (typeof output === "string" && output.length > 0) {
+    return output;
+  }
+
+  if (Array.isArray(output) && output.length > 0) {
+    const first = output[0];
+
+    if (typeof first === "string" && first.length > 0) {
+      return first;
+    }
+
+    if (
+      first &&
+      typeof first === "object" &&
+      "url" in first &&
+      typeof (first as { url?: unknown }).url === "string"
+    ) {
+      return (first as { url: string }).url;
+    }
+  }
+
+  if (
+    output &&
+    typeof output === "object" &&
+    "url" in output &&
+    typeof (output as { url?: unknown }).url === "string"
+  ) {
+    return (output as { url: string }).url;
+  }
+
+  return null;
+}
+
 export async function POST(req: NextRequest) {
+  let debitedUserId: string | null = null;
+
   try {
+    const replicateApiToken = process.env.REPLICATE_API_TOKEN;
+
+    if (
+      !replicateApiToken ||
+      replicateApiToken === "your_replicate_api_token_here"
+    ) {
+      return NextResponse.json(
+        { error: "REPLICATE_API_TOKEN est manquante ou invalide." },
+        { status: 500 }
+      );
+    }
+
     const user = await getAuthenticatedUser(req);
 
     if (!user) {
@@ -28,12 +95,32 @@ export async function POST(req: NextRequest) {
     }
 
     const formData = await req.formData();
-    const file = formData.get("file") as File | null;
+    const file = formData.get("file");
 
-    if (!file) {
+    if (!(file instanceof File)) {
       return NextResponse.json(
         { error: "Aucune image reçue." },
         { status: 400 }
+      );
+    }
+
+    const { data: currentUser, error: currentUserError } = await supabaseAdmin
+      .from("users")
+      .select("credits")
+      .eq("id", user.id)
+      .single();
+
+    if (currentUserError) {
+      return NextResponse.json(
+        { error: "Impossible de récupérer vos crédits." },
+        { status: 500 }
+      );
+    }
+
+    if (!currentUser || currentUser.credits <= 0) {
+      return NextResponse.json(
+        { error: "Vous n'avez plus de crédits." },
+        { status: 402 }
       );
     }
 
@@ -43,6 +130,7 @@ export async function POST(req: NextRequest) {
 
     if (creditError) {
       const isNoCredits = creditError.message?.includes("NO_CREDITS");
+
       return NextResponse.json(
         {
           error: isNoCredits
@@ -53,46 +141,133 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    debitedUserId = user.id;
+
     const bytes = await file.arrayBuffer();
-    const base64 = Buffer.from(bytes).toString("base64");
+    const buffer = Buffer.from(bytes);
+    const mimeType = file.type || "image/png";
+    const dataUri = `data:${mimeType};base64,${buffer.toString("base64")}`;
 
-    const blinkResponse = await fetch("https://api.blink.ai/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.BLINK_API_KEY}`,
-      },
-      body: JSON.stringify({
-        image: base64,
-        prompt: `
+    const prompt = `
 Ultra photorealistic interior home staging.
-Preserve original room structure and perspective.
-Add high-end modern furniture with perfect scale and proportions.
-Natural lighting, soft shadows, realistic materials (wood, fabric, glass).
-Professional real estate photography style.
-No distortion, no artificial look, no overdesign.
-Make the space warm, elegant, and highly attractive for buyers.
-        `,
-        quality: "high",
-        steps: 40,
-        guidance: 8,
-      }),
-    });
+Maintain the original composition and exact room structure.
+Preserve camera angle, walls, windows, floor, ceiling, and perspective.
+Add elegant high-end furniture with perfect scale and realistic placement.
+Use natural real-estate photography lighting, soft shadows, and realistic materials.
+Do not distort the room. Do not redesign the architecture.
+Make the room warm, premium, modern, and highly attractive to buyers.
+    `.trim();
 
-    if (!blinkResponse.ok) {
+    const replicateResponse = await fetch(
+      "https://api.replicate.com/v1/models/black-forest-labs/flux-kontext-max/predictions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${replicateApiToken}`,
+          "Content-Type": "application/json",
+          Prefer: "wait",
+        },
+        body: JSON.stringify({
+          input: {
+            prompt,
+            input_image: dataUri,
+            aspect_ratio: "match_input_image",
+          },
+        }),
+      }
+    );
+
+    const responseText = await replicateResponse.text();
+    let responseJson: any = null;
+
+    try {
+      responseJson = JSON.parse(responseText);
+    } catch {
+      responseJson = null;
+    }
+
+    if (!replicateResponse.ok) {
+      if (debitedUserId) {
+        await refundCredit(debitedUserId);
+      }
+
+      console.error("Replicate API HTTP error:", {
+        status: replicateResponse.status,
+        body: responseText,
+      });
+
       return NextResponse.json(
-        { error: "Erreur côté moteur de génération." },
+        {
+          error:
+            "Erreur côté moteur de génération Replicate. Vérifiez la clé API ou les paramètres du modèle.",
+        },
         { status: 502 }
       );
     }
 
-    const data = await blinkResponse.json();
+    if (responseJson?.error) {
+      if (debitedUserId) {
+        await refundCredit(debitedUserId);
+      }
 
-    return NextResponse.json({
-      imageUrl: data.output_url,
-    });
+      console.error("Replicate prediction error:", responseJson.error);
+
+      return NextResponse.json(
+        {
+          error: "Replicate a retourné une erreur pendant la génération.",
+        },
+        { status: 502 }
+      );
+    }
+
+    const predictionStatus = responseJson?.status;
+
+    if (
+      predictionStatus &&
+      predictionStatus !== "succeeded" &&
+      predictionStatus !== "successful"
+    ) {
+      if (debitedUserId) {
+        await refundCredit(debitedUserId);
+      }
+
+      console.error("Replicate unexpected status:", responseJson);
+
+      return NextResponse.json(
+        {
+          error:
+            "La génération n'a pas abouti. Réessaie dans quelques instants.",
+        },
+        { status: 502 }
+      );
+    }
+
+    const imageUrl = extractImageUrl(responseJson?.output);
+
+    if (!imageUrl) {
+      if (debitedUserId) {
+        await refundCredit(debitedUserId);
+      }
+
+      console.error("Replicate output missing image URL:", responseJson);
+
+      return NextResponse.json(
+        { error: "Aucune image exploitable n’a été retournée par Replicate." },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json({ imageUrl });
   } catch (error) {
+    if (debitedUserId) {
+      await refundCredit(debitedUserId);
+    }
+
     console.error("generate route error", error);
-    return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
+
+    return NextResponse.json(
+      { error: "Erreur serveur pendant la génération." },
+      { status: 500 }
+    );
   }
 }

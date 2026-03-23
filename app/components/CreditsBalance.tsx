@@ -1,99 +1,119 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 type AppUser = {
-  id: string
-  email: string
-}
+  id: string;
+  email: string;
+};
 
 export default function CreditsBalance() {
-  const [user, setUser] = useState<AppUser | null>(null)
-  const [credits, setCredits] = useState<number | null>(null)
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
   const fetchCredits = async (userId: string) => {
     const { data, error } = await supabase
-      .from('users')
-      .select('credits')
-      .eq('id', userId)
-      .single()
+      .from("users")
+      .select("credits")
+      .eq("id", userId)
+      .single();
 
     if (error) {
-      setCredits(0)
-      return
+      setCredits(0);
+      return;
     }
 
-    setCredits(data?.credits ?? 0)
-  }
+    setCredits(data?.credits ?? 0);
+  };
+
+  const loadCurrentUser = async () => {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      setUser(null);
+      setCredits(null);
+      return;
+    }
+
+    setUser({
+      id: user.id,
+      email: user.email || "",
+    });
+
+    await fetchCredits(user.id);
+  };
 
   useEffect(() => {
-    const init = async () => {
-      const { data } = await supabase.auth.getUser()
-      if (data.user) {
-        setUser({
-          id: data.user.id,
-          email: data.user.email || '',
-        })
-        await fetchCredits(data.user.id)
-      }
-    }
+    loadCurrentUser();
 
-    init()
-
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
         setUser({
           id: session.user.id,
-          email: session.user.email || '',
-        })
-        await fetchCredits(session.user.id)
+          email: session.user.email || "",
+        });
+        await fetchCredits(session.user.id);
       } else {
-        setUser(null)
-        setCredits(null)
+        setUser(null);
+        setCredits(null);
       }
-    })
+    });
 
     return () => {
-      listener.subscription.unsubscribe()
-    }
-  }, [])
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleSignIn = async () => {
-    setMessage(null)
+    setMessage(null);
 
-    if (!email) {
-      setMessage('Veuillez entrer votre email.')
-      return
+    if (!email.trim()) {
+      setMessage("Veuillez entrer votre email.");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     const { error } = await supabase.auth.signInWithOtp({
-      email,
+      email: email.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}`,
+        emailRedirectTo: window.location.origin,
       },
-    })
+    });
 
-    setLoading(false)
+    setLoading(false);
 
     if (error) {
-      setMessage(error.message)
-      return
+      setMessage(error.message);
+      return;
     }
 
-    setMessage('Lien magique envoyé. Vérifiez votre boîte mail.')
-  }
+    setMessage("Lien magique envoyé. Vérifiez votre boîte mail.");
+  };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    setCredits(null)
-  }
+    setMessage(null);
+    await supabase.auth.signOut();
+    setUser(null);
+    setCredits(null);
+  };
+
+  const handleRefresh = async () => {
+    if (!user) return;
+    setRefreshing(true);
+    await loadCurrentUser();
+    setRefreshing(false);
+  };
 
   return (
     <div className="p-4 bg-white rounded shadow max-w-sm mx-auto text-black">
@@ -104,17 +124,21 @@ export default function CreditsBalance() {
           <p className="mb-2 text-sm">
             Connecté : <span className="font-medium">{user.email}</span>
           </p>
+
           <p className="text-2xl font-bold mb-3">
-            {credits ?? 0} crédits
+            {credits ?? 0} crédit{credits === 1 ? "" : "s"}
           </p>
+
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => fetchCredits(user.id)}
+              onClick={handleRefresh}
+              disabled={refreshing}
               className="px-3 py-2 bg-gray-200 rounded"
             >
-              Rafraîchir
+              {refreshing ? "Actualisation..." : "Rafraîchir"}
             </button>
+
             <button
               type="button"
               onClick={handleSignOut}
@@ -133,20 +157,23 @@ export default function CreditsBalance() {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full p-2 mb-3 border rounded"
           />
+
           <button
             type="button"
             onClick={handleSignIn}
             disabled={loading}
             className="w-full px-3 py-2 bg-black text-white rounded"
           >
-            {loading ? 'Envoi...' : 'Se connecter / Créer un compte'}
+            {loading ? "Envoi..." : "Se connecter / Créer un compte"}
           </button>
+
           {message && <p className="mt-2 text-sm text-gray-600">{message}</p>}
+
           <p className="mt-2 text-xs text-gray-500">
             1 crédit gratuit à la création du compte
           </p>
         </>
       )}
     </div>
-  )
+  );
 }

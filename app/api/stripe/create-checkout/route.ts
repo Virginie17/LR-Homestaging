@@ -4,7 +4,7 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 function getBaseUrl() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const baseUrl = process.env.APP_BASE_URL;
   if (baseUrl) return baseUrl;
 
   const vercelUrl = process.env.VERCEL_URL;
@@ -19,28 +19,17 @@ export async function POST(req: NextRequest) {
     const { priceId, email, userId } = body;
 
     if (!priceId) {
-      return NextResponse.json(
-        { error: "priceId requis." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "priceId requis." }, { status: 400 });
     }
 
     if (!email) {
-      return NextResponse.json(
-        { error: "email requis." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "email requis." }, { status: 400 });
     }
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: email,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${getBaseUrl()}/?checkout=success`,
       cancel_url: `${getBaseUrl()}/?checkout=cancel`,
       metadata: {
