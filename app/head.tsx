@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="fr">
       <head>
         <link rel="icon" href="/favicon.png" />
-        <GoogleTagManager gtmId="G-XXXXXXXXXX" />
+        <GoogleTagManager gtmId="G-DEVMODE123" />
       </head>
       <body>{children}</body>
     </html>

@@ -11,7 +11,11 @@ type AppUser = {
 export default function CreditsBalance() {
   const [user, setUser] = useState<AppUser | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
+
   const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -74,7 +78,7 @@ export default function CreditsBalance() {
     };
   }, []);
 
-  const handleSignIn = async () => {
+  const handleSendOtp = async () => {
     setMessage(null);
 
     if (!email.trim()) {
@@ -87,7 +91,7 @@ export default function CreditsBalance() {
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: window.location.origin,
+        shouldCreateUser: true,
       },
     });
 
@@ -98,7 +102,41 @@ export default function CreditsBalance() {
       return;
     }
 
-    setMessage("Lien magique envoyé. Vérifiez votre boîte mail.");
+    setOtpSent(true);
+    setMessage("Code envoyé par email. Saisissez-le ci-dessous.");
+  };
+
+  const handleVerifyOtp = async () => {
+    setMessage(null);
+
+    if (!email.trim()) {
+      setMessage("Veuillez entrer votre email.");
+      return;
+    }
+
+    if (!otp.trim()) {
+      setMessage("Veuillez entrer le code reçu.");
+      return;
+    }
+
+    setLoading(true);
+
+    const { error } = await supabase.auth.verifyOtp({
+      email: email.trim(),
+      token: otp.trim(),
+      type: "email",
+    });
+
+    setLoading(false);
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    setMessage("Connexion réussie.");
+    setOtp("");
+    await loadCurrentUser();
   };
 
   const handleSignOut = async () => {
@@ -106,6 +144,8 @@ export default function CreditsBalance() {
     await supabase.auth.signOut();
     setUser(null);
     setCredits(null);
+    setOtp("");
+    setOtpSent(false);
   };
 
   const handleRefresh = async () => {
@@ -158,14 +198,47 @@ export default function CreditsBalance() {
             className="w-full p-2 mb-3 border rounded"
           />
 
-          <button
-            type="button"
-            onClick={handleSignIn}
-            disabled={loading}
-            className="w-full px-3 py-2 bg-black text-white rounded"
-          >
-            {loading ? "Envoi..." : "Se connecter / Créer un compte"}
-          </button>
+          {!otpSent ? (
+            <button
+              type="button"
+              onClick={handleSendOtp}
+              disabled={loading}
+              className="w-full px-3 py-2 bg-black text-white rounded"
+            >
+              {loading ? "Envoi..." : "Recevoir un code"}
+            </button>
+          ) : (
+            <>
+              <input
+                type="text"
+                placeholder="Code reçu par email"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                className="w-full p-2 mt-3 mb-3 border rounded"
+              />
+
+              <button
+                type="button"
+                onClick={handleVerifyOtp}
+                disabled={loading}
+                className="w-full px-3 py-2 bg-black text-white rounded"
+              >
+                {loading ? "Vérification..." : "Valider le code"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setOtpSent(false);
+                  setOtp("");
+                  setMessage(null);
+                }}
+                className="w-full mt-2 px-3 py-2 bg-gray-200 rounded"
+              >
+                Changer d’email
+              </button>
+            </>
+          )}
 
           {message && <p className="mt-2 text-sm text-gray-600">{message}</p>}
 

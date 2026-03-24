@@ -12,7 +12,7 @@ export const trackEvent = (eventName: string, data?: Record<string, any>) => {
 
 export const trackPageView = (pageName: string) => {
   if (typeof window !== "undefined" && window.gtag) {
-    window.gtag("config", "GA_MEASUREMENT_ID", {
+    window.gtag("config", "G-DEVMODE123", {
       page_title: pageName,
       page_location: window.location.href,
     });
