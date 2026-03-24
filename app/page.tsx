@@ -3,6 +3,8 @@
 import Image from "next/image";
 import ServiceSimulationForm from "./components/ServiceSimulationForm";
 import FinalButton from "./components/FinalButton";
+import HomeStagingGenerator from "./components/HomeStagingGenerator";
+import CreditsBalance from "./components/CreditsBalance";
 import { trackEvent } from "../lib/analytics";
 
 export default function LRHomeStaging() {
@@ -24,59 +26,93 @@ export default function LRHomeStaging() {
       </header>
 
       <section className="relative min-h-screen bg-[url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2')] bg-cover bg-center flex items-center">
-        <div className="absolute inset-0 bg-black/55" />
+        <div className="absolute inset-0 bg-black/60" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-16 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            
+            {/* COLONNE GAUCHE */}
             <div className="text-white max-w-2xl">
               <p className="inline-block bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm mb-6">
                 Home staging IA ultra réaliste
               </p>
 
               <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
-                Transformez vos photos immobilières en visuels coup de cœur grâce à l'IA
+                Transformez votre photo immobilière en visuel coup de cœur en quelques secondes
               </h1>
 
-              <p className="text-lg md:text-xl text-gray-200 mb-8">
-                Valorisez un bien vide, ancien ou difficile à vendre avec un home
-                staging ultra réaliste. Testez gratuitement une première image et
-                aidez vos futurs acheteurs à se projeter immédiatement.
+              <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed">
+                Importez une photo, générez un rendu premium, et aidez immédiatement
+                acheteurs et locataires à se projeter dans le potentiel du bien.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-6">
                 <a
-                  href="/studio"
-                  onClick={() => trackEvent("cta_click", { button: "hero_test_free" })}
+                  href="#generate"
+                  onClick={() => trackEvent("cta_click", { button: "hero_test_photo" })}
                   className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-xl text-center transition"
                 >
-                  Tester gratuitement
+                  Tester votre photo maintenant
                 </a>
 
                 <a
-                  href="#temoignages"
+                  href="#demo"
                   onClick={() => trackEvent("cta_click", { button: "hero_demo" })}
                   className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-6 py-3 rounded-xl text-center transition"
                 >
-                  Voir un avant / après
+                  Voir un avant / après réel
                 </a>
               </div>
 
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-gray-300 mb-8">
                 1 image offerte • Sans engagement • Résultat premium
               </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                <div className="bg-white/10 border border-white/10 rounded-2xl p-4">
+                  <p className="font-semibold mb-1">Rapide</p>
+                  <p className="text-gray-300">
+                    Importez votre photo et obtenez un rendu attractif en quelques secondes.
+                  </p>
+                </div>
+
+                <div className="bg-white/10 border border-white/10 rounded-2xl p-4">
+                  <p className="font-semibold mb-1">Réaliste</p>
+                  <p className="text-gray-300">
+                    Visuels premium pensés pour la vente, la location et la projection.
+                  </p>
+                </div>
+
+                <div className="bg-white/10 border border-white/10 rounded-2xl p-4">
+                  <p className="font-semibold mb-1">Efficace</p>
+                  <p className="text-gray-300">
+                    Aidez vos prospects à se projeter plus vite dès la première visite.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="flex justify-center lg:justify-end">
-              <div className="bg-white rounded-2xl shadow-2xl p-4 max-w-xl w-full">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Avant</p>
-                    <Image src="/avant.jpg" alt="Avant home staging" width={300} height={225} className="aspect-[4/3] rounded-xl object-cover" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600 mb-2">Après</p>
-                    <Image src="/apres.jpg" alt="Après home staging" width={300} height={225} className="aspect-[4/3] rounded-xl object-cover" />
-                  </div>
+            {/* COLONNE DROITE */}
+            <div id="generate" className="w-full">
+              <div className="bg-white rounded-3xl shadow-2xl p-4 md:p-6">
+                <div className="mb-4">
+                  <p className="text-sm uppercase tracking-wide text-yellow-600 font-semibold mb-2">
+                    Test immédiat
+                  </p>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Testez votre photo dès maintenant
+                  </h2>
+                  <p className="text-gray-600">
+                    Importez votre image pour obtenir un home staging premium et déclencher le coup de cœur.
+                  </p>
+                </div>
+
+                <HomeStagingGenerator />
+
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <p className="text-sm text-gray-500 text-center">
+                    Avant / Après instantané • Idéal pour particuliers, agences et investisseurs
+                  </p>
                 </div>
               </div>
             </div>
@@ -410,7 +446,11 @@ export default function LRHomeStaging() {
             </div>
           </section>
 
-          <div className="mb-20">
+      <div id="account" className="max-w-md mx-auto mt-10 px-4">
+        <CreditsBalance />
+      </div>
+
+      <div className="mb-20">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <p className="text-sm font-semibold uppercase tracking-wider text-yellow-600 mb-3">
                 Pour qui
@@ -469,6 +509,101 @@ export default function LRHomeStaging() {
             >
               Tester maintenant
             </a>
+          </div>
+        </div>
+      </section>
+
+      <section id="temoignages" className="bg-gray-50 py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <p className="text-sm font-semibold uppercase tracking-wider text-yellow-600 mb-3">
+              Témoignages
+            </p>
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6">
+              Ils voient immédiatement le potentiel du bien
+            </h2>
+            <p className="text-lg text-gray-600 leading-relaxed">
+              LR Homestaging aide particuliers et professionnels à rendre leurs
+              annonces plus attractives et plus convaincantes grâce à des visuels IA
+              premium.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-1 text-yellow-500 mb-4">
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+              </div>
+
+              <p className="text-gray-700 mb-6 leading-relaxed">
+                "Le rendu a permis de mieux visualiser le potentiel du bien dès la
+                première visite. C'est un vrai plus pour aider à la projection."
+              </p>
+
+              <p className="font-semibold text-gray-900">Propriétaire vendeur</p>
+            </div>
+
+            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-1 text-yellow-500 mb-4">
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+              </div>
+
+              <p className="text-gray-700 mb-6 leading-relaxed">
+                "Les visuels avant/après rendent l'annonce beaucoup plus attractive.
+                C'est simple, rapide et très convaincant."
+              </p>
+
+              <p className="font-semibold text-gray-900">
+                Professionnel de l'immobilier
+              </p>
+            </div>
+
+            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-1 text-yellow-500 mb-4">
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+              </div>
+
+              <p className="text-gray-700 mb-6 leading-relaxed">
+                "La possibilité de générer un intérieur réaliste en quelques secondes
+                apporte une vraie valeur perçue au bien."
+              </p>
+
+              <p className="font-semibold text-gray-900">Investisseur immobilier</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <p className="text-3xl font-bold text-gray-900 mb-2">1</p>
+              <p className="text-gray-600 text-sm">image offerte</p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <p className="text-3xl font-bold text-gray-900 mb-2">Premium</p>
+              <p className="text-gray-600 text-sm">rendu visuel réaliste</p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <p className="text-3xl font-bold text-gray-900 mb-2">Simple</p>
+              <p className="text-gray-600 text-sm">prise en main immédiate</p>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <p className="text-3xl font-bold text-gray-900 mb-2">Pro</p>
+              <p className="text-gray-600 text-sm">pensé pour l'immobilier</p>
+            </div>
           </div>
         </div>
       </section>
@@ -592,6 +727,45 @@ export default function LRHomeStaging() {
           >
             Accéder à l'outil IA
           </a>
+        </div>
+      </section>
+
+      <section className="bg-black text-white py-20 px-6">
+        <div className="max-w-5xl mx-auto text-center">
+          <p className="text-sm font-semibold uppercase tracking-wider text-yellow-400 mb-3">
+            Passez à l'action
+          </p>
+
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">
+            Testez votre photo maintenant et déclenchez le coup de cœur
+          </h2>
+
+          <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
+            Un visuel plus attractif peut changer la perception d'un bien en quelques
+            secondes. Faites l'essai gratuitement et voyez la différence.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+            <a
+              href="#generate"
+              onClick={() => trackEvent("cta_click", { button: "final_cta_test" })}
+              className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-8 py-4 rounded-xl transition"
+            >
+              Tester votre photo maintenant
+            </a>
+
+            <a
+              href="#pricing"
+              onClick={() => trackEvent("cta_click", { button: "final_cta_packs" })}
+              className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-8 py-4 rounded-xl transition"
+            >
+              Choisir mon pack
+            </a>
+          </div>
+
+          <p className="text-sm text-gray-400">
+            1 image offerte • Idéal pour particuliers, agences et investisseurs
+          </p>
         </div>
       </section>
 
