@@ -23,46 +23,66 @@ export default function LRHomeStaging() {
         </nav>
       </header>
 
-      {/* HERO OPTIMISÉ - PROJECTION PERSONNALISÉE */}
+      {/* HERO MACHINE À CONVERTIR */}
       <section className="bg-gradient-to-b from-white to-gray-50 py-20 px-6">
         <div className="max-w-6xl mx-auto text-center">
 
-          {/* Badge */}
-          <p className="text-sm font-semibold text-yellow-600 uppercase tracking-wider mb-4">
-            Home staging IA nouvelle génération
+          {/* Badge urgence */}
+          <p className="text-sm font-semibold text-red-600 uppercase tracking-wider mb-4">
+            Offre lancement : 1 image gratuite
           </p>
 
-          {/* Titre */}
+          {/* Titre agressif */}
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
-            Projetez vos meubles dans n'importe quel bien immobilier
+            Transformez votre bien en coup de cœur en 15 secondes
           </h1>
 
-          {/* Sous titre */}
+          {/* Sous-texte stratégique */}
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            Importez une photo et visualisez instantanément votre futur intérieur avec vos propres meubles.
-            Idéal pour acheter, louer ou vendre plus rapidement.
+            Importez une photo → obtenez un rendu ultra réaliste → déclenchez la projection
           </p>
 
-          {/* CTA */}
-          <a
-            href="#projection"
-            onClick={() => trackEvent("cta_click", { button: "hero_projection" })}
-            className="inline-block bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-8 py-4 rounded-xl text-lg transition"
-          >
-            Tester ma projection maintenant
-          </a>
-
-          {/* Proof */}
-          <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm text-gray-500">
-            <span>✔ 1 image offerte</span>
-            <span>✔ Sans inscription</span>
-            <span>✔ Résultat en quelques secondes</span>
+          {/* Preuve sociale forte */}
+          <div className="flex justify-center gap-8 mb-8 text-sm text-gray-700">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-black">+50</span>
+              <span>biens transformés</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-black">80%</span>
+              <span>trouvent le rendu plus attractif</span>
+            </div>
           </div>
 
+          {/* CTA agressif */}
+          <a
+            href="#projection"
+            onClick={() => trackEvent("cta_click", { button: "hero_conversion" })}
+            className="inline-block bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-8 py-4 rounded-xl text-lg transition"
+          >
+            Tester votre photo maintenant
+          </a>
+
+          {/* Micro copy stratégique */}
+          <p className="text-sm text-gray-500 mt-3">
+            Aucun engagement – résultat en quelques secondes
+          </p>
+        </div>
+
+        {/* PREUVE IMMÉDIATE - Slider avant/après au-dessus du fold */}
+        <div className="max-w-4xl mx-auto mt-12">
+          <BeforeAfterSlider
+            title="Salle de bain transformée en 15 secondes"
+            beforeSrc="/chambre avant.png"
+            afterSrc="/cuisine 2 avant apres.png"
+            beforeText="Salle de bain datée qui freine les acheteurs"
+            afterText="Espace moderne qui déclenche immédiatement le coup de cœur"
+            badge="+85% d'attractivité perçue"
+          />
         </div>
 
         {/* Générateur DIRECT dans le hero */}
-        <div id="projection" className="mt-16 max-w-4xl mx-auto">
+        <div id="projection" className="max-w-4xl mx-auto mt-8">
           <HomeStagingGenerator />
         </div>
       </section>
@@ -286,65 +306,89 @@ export default function LRHomeStaging() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* STARTER */}
-            <div className="border rounded-3xl p-8 text-center shadow-sm">
-              <h3 className="text-xl font-semibold mb-4">Starter</h3>
-              <p className="text-4xl font-bold mb-4">9€</p>
-              <p className="text-gray-600 mb-6">10 crédits</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+            {/* PACK VENTE RAPIDE - NOUVEAU */}
+            <div className="border-2 border-red-500 rounded-3xl p-6 text-center shadow-lg bg-red-50 relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                LE PLUS VENDU
+              </div>
+              <h3 className="text-lg font-bold mb-2">Vente Rapide</h3>
+              <p className="text-3xl font-bold mb-2">29€</p>
+              <p className="text-gray-600 text-sm mb-4">5 visuels optimisés</p>
 
-              <ul className="text-sm text-gray-600 mb-8 space-y-2">
-                <li>&#10004; 10 transformations</li>
-                <li>&#10004; Idéal pour tester</li>
-                <li>&#10004; Parfait pour particuliers</li>
+              <ul className="text-xs text-gray-600 mb-6 space-y-1">
+                <li>✓ 5 transformations premium</li>
+                <li>✓ Optimisés pour annonce</li>
+                <li>✓ Support prioritaire</li>
+                <li>✓ Livraison 24h</li>
+              </ul>
+
+              <button 
+                onClick={() => trackEvent("cta_click", { button: "pricing_vente_rapide" })}
+                className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold"
+              >
+                Choisir Vente Rapide
+              </button>
+            </div>
+
+            {/* STARTER */}
+            <div className="border rounded-3xl p-6 text-center shadow-sm">
+              <h3 className="text-lg font-semibold mb-2">Starter</h3>
+              <p className="text-2xl font-bold mb-2">9€</p>
+              <p className="text-gray-600 text-sm mb-4">10 crédits</p>
+
+              <ul className="text-xs text-gray-600 mb-6 space-y-1">
+                <li>✓ 10 transformations</li>
+                <li>✓ Idéal pour débuter</li>
+                <li>✓ Sans engagement</li>
               </ul>
 
               <button 
                 onClick={() => trackEvent("cta_click", { button: "pricing_starter" })}
-                className="w-full bg-black text-white py-3 rounded-xl"
+                className="w-full bg-black text-white py-2 rounded-lg text-sm"
               >
                 Choisir Starter
               </button>
             </div>
 
             {/* PRO */}
-            <div className="border-2 border-yellow-500 rounded-3xl p-8 text-center shadow-lg relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-500 px-4 py-1 rounded-full">
-                <span className="text-sm font-bold text-black">Le plus populaire</span>
+            <div className="border-2 border-yellow-500 rounded-3xl p-6 text-center shadow-sm relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold">
+                POPULAIRE
               </div>
-              <h3 className="text-xl font-semibold mb-4">Pro</h3>
-              <p className="text-4xl font-bold mb-4">19€</p>
-              <p className="text-gray-600 mb-6">30 crédits</p>
+              <h3 className="text-lg font-bold mb-2">Pro</h3>
+              <p className="text-2xl font-bold mb-2">19€</p>
+              <p className="text-gray-600 text-sm mb-4">30 crédits</p>
 
-              <ul className="text-sm text-gray-600 mb-8 space-y-2">
-                <li>&#10004; 30 transformations</li>
-                <li>&#10004; Meilleur rapport qualité/prix</li>
-                <li>&#10004; Idéal agences et pros</li>
+              <ul className="text-xs text-gray-600 mb-6 space-y-1">
+                <li>✓ 30 transformations</li>
+                <li>✓ Meilleur rapport qualité/prix</li>
+                <li>✓ Mode projection inclus</li>
               </ul>
 
               <button 
                 onClick={() => trackEvent("cta_click", { button: "pricing_pro" })}
-                className="w-full bg-yellow-500 text-black py-3 rounded-xl font-semibold"
+                className="w-full bg-yellow-500 hover:bg-yellow-400 text-black py-2 rounded-lg text-sm font-semibold"
               >
                 Choisir Pro
               </button>
             </div>
 
             {/* BUSINESS */}
-            <div className="border rounded-3xl p-8 text-center shadow-sm">
-              <h3 className="text-xl font-semibold mb-4">Business</h3>
-              <p className="text-4xl font-bold mb-4">49€</p>
-              <p className="text-gray-600 mb-6">100 crédits</p>
+            <div className="border rounded-3xl p-6 text-center shadow-sm">
+              <h3 className="text-lg font-semibold mb-2">Business</h3>
+              <p className="text-2xl font-bold mb-2">49€</p>
+              <p className="text-gray-600 text-sm mb-4">100 crédits</p>
 
-              <ul className="text-sm text-gray-600 mb-8 space-y-2">
-                <li>&#10004; 100 transformations</li>
-                <li>&#10004; Idéal gros volumes</li>
-                <li>&#10004; Utilisation intensive</li>
+              <ul className="text-xs text-gray-600 mb-6 space-y-1">
+                <li>✓ 100 transformations</li>
+                <li>✓ Idéal gros volumes</li>
+                <li>✓ Utilisation intensive</li>
               </ul>
 
               <button 
                 onClick={() => trackEvent("cta_click", { button: "pricing_business" })}
-                className="w-full bg-black text-white py-3 rounded-xl"
+                className="w-full bg-black text-white py-2 rounded-lg text-sm"
               >
                 Choisir Business
               </button>

@@ -96,6 +96,7 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const file = formData.get("file");
+    const mode = formData.get("mode") as string || "homeStaging";
 
     if (!(file instanceof File)) {
       return NextResponse.json(
@@ -119,7 +120,7 @@ export async function POST(req: NextRequest) {
 
     if (!currentUser || currentUser.credits <= 0) {
       return NextResponse.json(
-        { error: "Vous n'avez plus de crédits." },
+        { error: "Crédits insuffisants. Choisissez un pack pour continuer.", needsUpgrade: true },
         { status: 402 }
       );
     }
@@ -134,8 +135,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: isNoCredits
-            ? "Vous n'avez plus de crédits."
+            ? "Crédits insuffisants. Choisissez un pack pour continuer."
             : "Impossible de consommer un crédit.",
+          needsUpgrade: true
         },
         { status: 402 }
       );
@@ -148,11 +150,19 @@ export async function POST(req: NextRequest) {
     const mimeType = file.type || "image/png";
     const dataUri = `data:${mimeType};base64,${buffer.toString("base64")}`;
 
-    const prompt = `
+    const prompt = mode === "projection" 
+      ? `
+Ultra photorealistic interior projection with user's furniture.
+STRICT: Maintain exact room structure, walls, windows, and architectural elements.
+Add realistic furniture placement that respects the existing space and proportions.
+Use natural real-estate photography lighting with soft shadows.
+DO NOT modify walls, windows, or room structure.
+Make the projection credible and emotionally engaging for buyers.
+      `.trim()
+      : `
 Ultra photorealistic interior home staging.
-Maintain the original composition and exact room structure.
-Preserve camera angle, walls, windows, floor, ceiling, and perspective.
-Add elegant high-end furniture with perfect scale and realistic placement.
+Maintain the exact room structure and perspective.
+Add elegant modern furniture with realistic placement and proportions.
 Use natural real-estate photography lighting, soft shadows, and realistic materials.
 Do not distort the room. Do not redesign the architecture.
 Make the room warm, premium, modern, and highly attractive to buyers.

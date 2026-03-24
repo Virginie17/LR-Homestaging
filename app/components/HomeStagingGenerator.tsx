@@ -10,6 +10,9 @@ export default function HomeStagingGenerator() {
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<"homeStaging" | "projection">("homeStaging");
+  const [loadingStep, setLoadingStep] = useState<string>("");
+  const [progress, setProgress] = useState(0);
 
   const previewUrl = useMemo(() => {
     if (!file) return null;
@@ -31,49 +34,54 @@ export default function HomeStagingGenerator() {
 
     setLoading(true);
     setError(null);
+    setProgress(0);
+
+    // Simulation des étapes de loading selon le mode
+    if (mode === "homeStaging") {
+      setLoadingStep("Analyse de la pièce...");
+      setProgress(20);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setLoadingStep("Optimisation de la lumière...");
+      setProgress(40);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setLoadingStep("Ajout du mobilier design...");
+      setProgress(60);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setLoadingStep("Rendu final en cours...");
+      setProgress(80);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setLoadingStep("Finalisation...");
+      setProgress(95);
+    } else {
+      setLoadingStep("Analyse des murs et fenêtres...");
+      setProgress(20);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setLoadingStep("Détection de l'espace disponible...");
+      setProgress(40);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setLoadingStep("Intégration de vos meubles...");
+      setProgress(60);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setLoadingStep("Finalisation de la projection...");
+      setProgress(80);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setLoadingStep("Finalisation...");
+      setProgress(95);
+    }
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
+      // ZERO FRICTION : Toujours utiliser la route gratuite
       const formData = new FormData();
       formData.append("file", file);
-
-      // Utilisateur connecté -> route normale avec crédits
-      if (session?.access_token) {
-        const res = await fetch("/api/generate", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: formData,
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data?.error || "Erreur lors de la génération.");
-        }
-
-        if (!data?.imageUrl) {
-          throw new Error("Aucune image générée n'a été retournée.");
-        }
-
-        setResult(data.imageUrl);
-        return;
-      }
-
-      // Utilisateur non connecté -> 1 essai gratuit
-      const freeTryUsed =
-        typeof window !== "undefined" &&
-        localStorage.getItem(FREE_TRY_KEY) === "true";
-
-      if (freeTryUsed) {
-        throw new Error(
-          "Votre essai gratuit a déjà été utilisé. Créez un compte pour continuer."
-        );
-      }
+      formData.append("mode", mode);
 
       const res = await fetch("/api/generate-free", {
         method: "POST",
@@ -83,6 +91,15 @@ export default function HomeStagingGenerator() {
       const data = await res.json();
 
       if (!res.ok) {
+        // Si crédits insuffisants, rediriger vers tarifs
+        if (data?.needsUpgrade) {
+          setError("Crédits insuffisants. Choisissez un pack pour continuer.");
+          // Redirection automatique vers les tarifs après 2 secondes
+          setTimeout(() => {
+            window.location.href = "#pricing";
+          }, 2000);
+          return;
+        }
         throw new Error(data?.error || "Erreur lors de la génération.");
       }
 
@@ -90,17 +107,51 @@ export default function HomeStagingGenerator() {
         throw new Error("Aucune image générée n'a été retournée.");
       }
 
-      localStorage.setItem(FREE_TRY_KEY, "true");
+      setProgress(100);
       setResult(data.imageUrl);
     } catch (err: any) {
       setError(err?.message || "Erreur serveur.");
     } finally {
       setLoading(false);
+      setLoadingStep("");
+      setProgress(0);
     }
   };
 
   return (
     <div className="text-black">
+      {/* DOUBLE MODE PRODUIT */}
+      <div className="mb-6">
+        <div className="flex gap-2">
+          <button
+            onClick={() => setMode("homeStaging")}
+            className={`px-4 py-2 rounded font-medium transition ${
+              mode === "homeStaging"
+                ? "bg-black text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            Home staging rapide
+          </button>
+          <button
+            onClick={() => setMode("projection")}
+            className={`px-4 py-2 rounded font-medium transition ${
+              mode === "projection"
+                ? "bg-black text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            Projection avec mes meubles
+          </button>
+        </div>
+        <p className="text-sm text-gray-600 mt-2">
+          {mode === "homeStaging" 
+            ? "Transformez votre pièce avec mobilier design et moderne" 
+            : "Projetez vos propres meubles dans votre futur bien"
+          }
+        </p>
+      </div>
+
       <div className="mb-4">
         <strong className="block text-gray-900">
           Qualité Premium — rendu photo professionnel
@@ -133,10 +184,43 @@ export default function HomeStagingGenerator() {
 
       {loading && (
         <div className="mt-4 rounded-2xl border border-gray-200 p-4 bg-gray-50">
-          <p className="text-sm text-gray-600 mb-2">Analyse de la pièce...</p>
-          <p className="text-sm text-gray-600 mb-2">Optimisation de la lumière...</p>
-          <p className="text-sm text-gray-600 mb-2">Ajout du mobilier...</p>
-          <p className="text-sm text-gray-600">Rendu final en cours...</p>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="animate-spin w-4 h-4 border-2 border-black border-t-transparent rounded-full"></div>
+            <p className="text-sm font-medium text-gray-900">{loadingStep}</p>
+          </div>
+          
+          {/* Barre de progression */}
+          <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
+            <div 
+              className="bg-black h-2 rounded-full transition-all duration-800 ease-out" 
+              style={{width: `${progress}%`}}
+            />
+          </div>
+          
+          {/* Pourcentage */}
+          <div className="text-center text-sm font-medium text-gray-700 mb-3">
+            {progress}%
+          </div>
+
+          {/* Étapes selon le mode */}
+          <div className="space-y-1 text-xs text-gray-500">
+            {mode === "homeStaging" ? (
+              <>
+                <p className={loadingStep.includes("Analyse") ? "text-black font-medium" : ""}>✓ Analyse de la pièce</p>
+                <p className={loadingStep.includes("Optimisation") ? "text-black font-medium" : ""}>✓ Optimisation de la lumière</p>
+                <p className={loadingStep.includes("mobilier") ? "text-black font-medium" : ""}>✓ Ajout du mobilier design</p>
+                <p className={loadingStep.includes("Rendu") ? "text-black font-medium" : ""}>✓ Rendu final</p>
+              </>
+            ) : (
+              <>
+                <p className={loadingStep.includes("murs") ? "text-black font-medium" : ""}>✓ Analyse des murs et fenêtres</p>
+                <p className={loadingStep.includes("espace") ? "text-black font-medium" : ""}>✓ Détection de l'espace disponible</p>
+                <p className={loadingStep.includes("Intégration") ? "text-black font-medium" : ""}>✓ Intégration de vos meubles</p>
+                <p className={loadingStep.includes("Finalisation") ? "text-black font-medium" : ""}>✓ Finalisation de la projection</p>
+              </>
+            )}
+          </div>
+          
           <div className="animate-pulse h-64 bg-gray-200 rounded-xl mt-4" />
         </div>
       )}

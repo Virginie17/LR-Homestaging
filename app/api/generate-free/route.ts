@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const file = formData.get("file");
+    const mode = formData.get("mode") as string || "homeStaging";
 
     if (!(file instanceof File)) {
       return NextResponse.json(
@@ -55,19 +56,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ZERO FRICTION : Pas de vérification de compte
+    // 1 image gratuite SANS inscription
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const mimeType = file.type || "image/png";
     const dataUri = `data:${mimeType};base64,${buffer.toString("base64")}`;
 
-    const prompt = `
+    // Prompt optimisé selon le mode
+    const prompt = mode === "projection" 
+      ? `
+Ultra photorealistic interior projection with user's furniture.
+STRICT: Maintain exact room structure, walls, windows, and architectural elements.
+Add realistic furniture placement that respects the existing space and proportions.
+Use natural real-estate photography lighting with soft shadows.
+DO NOT modify walls, windows, or room structure.
+Make the projection credible and emotionally engaging for buyers.
+      `.trim()
+      : `
 Ultra photorealistic interior home staging.
 Maintain the exact room structure and perspective.
 Add elegant modern furniture with realistic placement and proportions.
 Use natural real-estate photography lighting, soft shadows, and realistic materials.
 Do not distort the room or architecture.
 Make the room attractive, warm, and credible for buyers.
-    `.trim();
+      `.trim();
 
     const replicateResponse = await fetch(
       "https://api.replicate.com/v1/models/black-forest-labs/flux-kontext-max/predictions",
