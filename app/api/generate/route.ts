@@ -125,26 +125,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { error: creditError } = await supabaseAdmin.rpc("consume_credit", {
-      p_user_id: user.id,
-    });
-
-    if (creditError) {
-      const isNoCredits = creditError.message?.includes("NO_CREDITS");
-
-      return NextResponse.json(
-        {
-          error: isNoCredits
-            ? "Crédits insuffisants. Choisissez un pack pour continuer."
-            : "Impossible de consommer un crédit.",
-          needsUpgrade: true
-        },
-        { status: 402 }
-      );
-    }
-
-    debitedUserId = user.id;
-
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const mimeType = file.type || "image/png";
@@ -164,9 +144,9 @@ Ultra photorealistic interior home staging.
 Maintain the exact room structure and perspective.
 Add elegant modern furniture with realistic placement and proportions.
 Use natural real-estate photography lighting, soft shadows, and realistic materials.
-Do not distort the room. Do not redesign the architecture.
-Make the room warm, premium, modern, and highly attractive to buyers.
-    `.trim();
+Do not distort the room or architecture.
+Make the room attractive, warm, and credible for buyers.
+      `.trim();
 
     const replicateResponse = await fetch(
       "https://api.replicate.com/v1/models/black-forest-labs/flux-kontext-max/predictions",
@@ -197,10 +177,6 @@ Make the room warm, premium, modern, and highly attractive to buyers.
     }
 
     if (!replicateResponse.ok) {
-      if (debitedUserId) {
-        await refundCredit(debitedUserId);
-      }
-
       console.error("Replicate API HTTP error:", {
         status: replicateResponse.status,
         body: responseText,
@@ -216,10 +192,6 @@ Make the room warm, premium, modern, and highly attractive to buyers.
     }
 
     if (responseJson?.error) {
-      if (debitedUserId) {
-        await refundCredit(debitedUserId);
-      }
-
       console.error("Replicate prediction error:", responseJson.error);
 
       return NextResponse.json(
@@ -237,10 +209,6 @@ Make the room warm, premium, modern, and highly attractive to buyers.
       predictionStatus !== "succeeded" &&
       predictionStatus !== "successful"
     ) {
-      if (debitedUserId) {
-        await refundCredit(debitedUserId);
-      }
-
       console.error("Replicate unexpected status:", responseJson);
 
       return NextResponse.json(
@@ -255,16 +223,21 @@ Make the room warm, premium, modern, and highly attractive to buyers.
     const imageUrl = extractImageUrl(responseJson?.output);
 
     if (!imageUrl) {
-      if (debitedUserId) {
-        await refundCredit(debitedUserId);
-      }
-
       console.error("Replicate output missing image URL:", responseJson);
 
       return NextResponse.json(
-        { error: "Aucune image exploitable n’a été retournée par Replicate." },
+        { error: "Aucune image exploitable n'a été retournée par Replicate." },
         { status: 502 }
       );
+    }
+
+    const { error: creditError } = await supabaseAdmin.rpc("consume_credit", {
+      p_user_id: user.id,
+    });
+
+    if (creditError) {
+      console.error("Credit consumption error:", creditError);
+      // On retourne quand même l'image mais on log l'erreur
     }
 
     return NextResponse.json({ imageUrl });

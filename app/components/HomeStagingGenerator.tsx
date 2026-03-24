@@ -10,7 +10,7 @@ export default function HomeStagingGenerator() {
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<"homeStaging" | "projection">("homeStaging");
+  const [mode, setMode] = useState<"homeStaging" | "projection">("projection");
   const [loadingStep, setLoadingStep] = useState<string>("");
   const [progress, setProgress] = useState(0);
 
@@ -32,53 +32,49 @@ export default function HomeStagingGenerator() {
       return;
     }
 
+    // Vérifier si l'essai gratuit a déjà été utilisé
+    const hasUsedFree = localStorage.getItem(FREE_TRY_KEY);
+    
     setLoading(true);
     setError(null);
     setProgress(0);
 
     // Simulation des étapes de loading selon le mode
-    if (mode === "homeStaging") {
-      setLoadingStep("Analyse de la pièce...");
-      setProgress(20);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setLoadingStep("Optimisation de la lumière...");
-      setProgress(40);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setLoadingStep("Ajout du mobilier design...");
-      setProgress(60);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setLoadingStep("Rendu final en cours...");
-      setProgress(80);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setLoadingStep("Finalisation...");
-      setProgress(95);
-    } else {
-      setLoadingStep("Analyse des murs et fenêtres...");
-      setProgress(20);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setLoadingStep("Détection de l'espace disponible...");
-      setProgress(40);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setLoadingStep("Intégration de vos meubles...");
-      setProgress(60);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setLoadingStep("Finalisation de la projection...");
-      setProgress(80);
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      setLoadingStep("Finalisation...");
-      setProgress(95);
+    const homeStagingSteps = [
+      "🔍 Analyse intelligente de la pièce...",
+      "💡 Optimisation de la lumière naturelle...",
+      "🪑 Ajout du mobilier design tendance...",
+      "✨ Rendu ultra réaliste en cours...",
+      "🎯 Finalisation du coup de cœur..."
+    ];
+
+    const projectionSteps = [
+      "🏗️ Analyse précise des murs et fenêtres...",
+      "📐 Détection de l'espace disponible...",
+      "🛋️ Intégration parfaite de vos meubles...",
+      "🌟 Finalisation de la projection immersive...",
+      "🎉 Votre futur intérieur est prêt..."
+    ];
+
+    const steps = mode === "homeStaging" ? homeStagingSteps : projectionSteps;
+    
+    for (let i = 0; i < steps.length; i++) {
+      setLoadingStep(steps[i]);
+      setProgress(20 + (i * 20));
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     try {
-      // ZERO FRICTION : Toujours utiliser la route gratuite
+      // Si essai gratuit déjà utilisé, rediriger vers tarifs
+      if (hasUsedFree) {
+        setError("Votre essai gratuit a été utilisé. Choisissez un pack pour continuer.");
+        setTimeout(() => {
+          window.location.href = "#pricing";
+        }, 2000);
+        return;
+      }
+
+      // ZERO FRICTION : Utiliser la route gratuite pour le premier essai
       const formData = new FormData();
       formData.append("file", file);
       formData.append("mode", mode);
@@ -107,6 +103,9 @@ export default function HomeStagingGenerator() {
         throw new Error("Aucune image générée n'a été retournée.");
       }
 
+      // Marquer l'essai gratuit comme utilisé
+      localStorage.setItem(FREE_TRY_KEY, "true");
+      
       setProgress(100);
       setResult(data.imageUrl);
     } catch (err: any) {
@@ -183,45 +182,85 @@ export default function HomeStagingGenerator() {
       </button>
 
       {loading && (
-        <div className="mt-4 rounded-2xl border border-gray-200 p-4 bg-gray-50">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="animate-spin w-4 h-4 border-2 border-black border-t-transparent rounded-full"></div>
-            <p className="text-sm font-medium text-gray-900">{loadingStep}</p>
+        <div className="mt-4 rounded-2xl border border-gray-200 p-6 bg-gray-50 shadow-lg">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="animate-spin w-5 h-5 border-2 border-black border-t-transparent rounded-full"></div>
+            <p className="text-base font-semibold text-gray-900">{loadingStep}</p>
           </div>
           
-          {/* Barre de progression */}
-          <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-            <div 
-              className="bg-black h-2 rounded-full transition-all duration-800 ease-out" 
-              style={{width: `${progress}%`}}
-            />
-          </div>
-          
-          {/* Pourcentage */}
-          <div className="text-center text-sm font-medium text-gray-700 mb-3">
-            {progress}%
+          {/* Barre de progression améliorée */}
+          <div className="mb-4">
+            <div className="flex justify-between text-xs text-gray-600 mb-2">
+              <span>Progression</span>
+              <span className="font-bold">{progress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
+              <div 
+                className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-3 rounded-full transition-all duration-500 ease-out shadow-sm" 
+                style={{width: `${progress}%`}}
+              />
+            </div>
           </div>
 
-          {/* Étapes selon le mode */}
-          <div className="space-y-1 text-xs text-gray-500">
-            {mode === "homeStaging" ? (
-              <>
-                <p className={loadingStep.includes("Analyse") ? "text-black font-medium" : ""}>✓ Analyse de la pièce</p>
-                <p className={loadingStep.includes("Optimisation") ? "text-black font-medium" : ""}>✓ Optimisation de la lumière</p>
-                <p className={loadingStep.includes("mobilier") ? "text-black font-medium" : ""}>✓ Ajout du mobilier design</p>
-                <p className={loadingStep.includes("Rendu") ? "text-black font-medium" : ""}>✓ Rendu final</p>
-              </>
-            ) : (
-              <>
-                <p className={loadingStep.includes("murs") ? "text-black font-medium" : ""}>✓ Analyse des murs et fenêtres</p>
-                <p className={loadingStep.includes("espace") ? "text-black font-medium" : ""}>✓ Détection de l'espace disponible</p>
-                <p className={loadingStep.includes("Intégration") ? "text-black font-medium" : ""}>✓ Intégration de vos meubles</p>
-                <p className={loadingStep.includes("Finalisation") ? "text-black font-medium" : ""}>✓ Finalisation de la projection</p>
-              </>
-            )}
+          {/* Étapes dynamiques avec emojis */}
+          <div className="bg-white rounded-xl p-4 border border-gray-100">
+            <p className="text-xs font-semibold text-gray-700 mb-3">Étapes en cours :</p>
+            <div className="space-y-2">
+              {mode === "homeStaging" ? (
+                <>
+                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("Analyse") ? "text-black font-bold" : "text-gray-400"}`}>
+                    <span>{loadingStep.includes("Analyse") ? "🔍" : "⭕"}</span>
+                    <span>Analyse intelligente de la pièce</span>
+                  </div>
+                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("Optimisation") ? "text-black font-bold" : "text-gray-400"}`}>
+                    <span>{loadingStep.includes("Optimisation") ? "💡" : "⭕"}</span>
+                    <span>Optimisation de la lumière naturelle</span>
+                  </div>
+                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("mobilier") ? "text-black font-bold" : "text-gray-400"}`}>
+                    <span>{loadingStep.includes("mobilier") ? "🪑" : "⭕"}</span>
+                    <span>Ajout du mobilier design tendance</span>
+                  </div>
+                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("Rendu") ? "text-black font-bold" : "text-gray-400"}`}>
+                    <span>{loadingStep.includes("Rendu") ? "✨" : "⭕"}</span>
+                    <span>Rendu ultra réaliste</span>
+                  </div>
+                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("Finalisation") ? "text-black font-bold" : "text-gray-400"}`}>
+                    <span>{loadingStep.includes("Finalisation") ? "🎯" : "⭕"}</span>
+                    <span>Finalisation du coup de cœur</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("murs") ? "text-black font-bold" : "text-gray-400"}`}>
+                    <span>{loadingStep.includes("murs") ? "🏗️" : "⭕"}</span>
+                    <span>Analyse précise des murs et fenêtres</span>
+                  </div>
+                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("espace") ? "text-black font-bold" : "text-gray-400"}`}>
+                    <span>{loadingStep.includes("espace") ? "📐" : "⭕"}</span>
+                    <span>Détection de l'espace disponible</span>
+                  </div>
+                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("Intégration") ? "text-black font-bold" : "text-gray-400"}`}>
+                    <span>{loadingStep.includes("Intégration") ? "🛋️" : "⭕"}</span>
+                    <span>Intégration parfaite de vos meubles</span>
+                  </div>
+                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("projection") ? "text-black font-bold" : "text-gray-400"}`}>
+                    <span>{loadingStep.includes("projection") ? "🌟" : "⭕"}</span>
+                    <span>Finalisation de la projection immersive</span>
+                  </div>
+                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("prêt") ? "text-black font-bold" : "text-gray-400"}`}>
+                    <span>{loadingStep.includes("prêt") ? "🎉" : "⭕"}</span>
+                    <span>Votre futur intérieur est prêt</span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
           
-          <div className="animate-pulse h-64 bg-gray-200 rounded-xl mt-4" />
+          {/* Skeleton loading amélioré */}
+          <div className="mt-4">
+            <div className="animate-pulse h-64 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl" />
+            <p className="text-center text-xs text-gray-500 mt-2">Génération en cours...</p>
+          </div>
         </div>
       )}
 
