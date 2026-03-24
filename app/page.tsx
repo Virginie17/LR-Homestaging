@@ -3,6 +3,7 @@
 import Image from "next/image";
 import HomeStagingGenerator from "./components/HomeStagingGenerator";
 import CreditsBalance from "./components/CreditsBalance";
+import BeforeAfterSlider from "./components/BeforeAfterSlider";
 import { trackEvent } from "../lib/analytics";
 
 export default function LRHomeStaging() {
@@ -13,15 +14,15 @@ export default function LRHomeStaging() {
           <Image src="/logo/logo noir.png" alt="LR HomeStaging" width={140} height={50} />
         </div>
         <nav className="hidden md:flex space-x-6">
-          <a href="#demo" className="hover:text-yellow-600 transition">Avant / AprÃ¨s</a>
+          <a href="#demo" className="hover:text-yellow-600 transition">Avant / Après</a>
           <a href="#pricing" className="hover:text-yellow-600 transition">Tarifs</a>
-          <a href="#temoignages" className="hover:text-yellow-600 transition">TÃ©moignages</a>
+          <a href="#temoignages" className="hover:text-yellow-600 transition">Témoignages</a>
           <a href="/studio" className="hover:text-yellow-600 transition font-semibold text-yellow-600">Outil IA</a>
           <a href="#contact" className="hover:text-yellow-600 transition">Contact</a>
         </nav>
       </header>
 
-      {/* 1. HERO + GÃ‰NÃ‰RATEUR */}
+      {/* 1. HERO + GÉNÉRATEUR */}
       <section className="relative min-h-screen bg-[url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2')] bg-cover bg-center flex items-center">
         <div className="absolute inset-0 bg-black/60" />
 
@@ -30,15 +31,15 @@ export default function LRHomeStaging() {
             {/* COLONNE GAUCHE */}
             <div className="text-white max-w-2xl">
               <p className="inline-block bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm mb-6">
-                Home staging IA ultra rÃ©aliste
+                Home staging IA ultra réaliste
               </p>
 
               <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
-                Transformez votre photo immobiliÃ¨re en visuel coup de cÅ“ur en quelques secondes
+                Transformez votre photo immobilière en visuel coup de cœur en quelques secondes
               </h1>
 
               <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed">
-                Importez votre photo, obtenez un rendu premium, et aidez acheteurs et locataires Ã  se projeter immÃ©diatement.
+                Importez votre photo, obtenez un rendu premium, et aidez acheteurs et locataires à se projeter immédiatement.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -55,12 +56,12 @@ export default function LRHomeStaging() {
                   onClick={() => trackEvent("cta_click", { button: "hero_demo" })}
                   className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-6 py-3 rounded-xl text-center transition"
                 >
-                  Voir un avant / aprÃ¨s rÃ©el
+                  Voir un avant / après réel
                 </a>
               </div>
 
               <p className="text-sm text-gray-300 mb-8">
-                1 image offerte â€¢ Sans engagement â€¢ RÃ©sultat premium
+                1 image offerte • Sans engagement • Résultat premium
               </p>
             </div>
 
@@ -69,13 +70,13 @@ export default function LRHomeStaging() {
               <div className="bg-white rounded-3xl shadow-2xl p-4 md:p-6">
                 <div className="mb-4">
                   <p className="text-sm uppercase tracking-wide text-yellow-600 font-semibold mb-2">
-                    Test immÃ©diat
+                    Test immédiat
                   </p>
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    Testez votre photo dÃ¨s maintenant
+                    Testez votre photo dès maintenant
                   </h2>
                   <p className="text-gray-600">
-                    Importez votre image pour obtenir un home staging premium et dÃ©clencher le coup de cÅ“ur.
+                    Importez votre image pour obtenir un home staging premium et déclencher le coup de cœur.
                   </p>
                 </div>
 
@@ -83,7 +84,7 @@ export default function LRHomeStaging() {
 
                 <div className="mt-6 pt-4 border-t border-gray-200">
                   <p className="text-sm text-gray-500 text-center">
-                    Avant / AprÃ¨s instantanÃ© â€¢ IdÃ©al pour particuliers, agences et investisseurs
+                    Avant / Après instantané • Idéal pour particuliers, agences et investisseurs
                   </p>
                 </div>
               </div>
@@ -92,12 +93,12 @@ export default function LRHomeStaging() {
         </div>
       </section>
 
-      {/* 2. COMMENT Ã‡A MARCHE */}
+      {/* 2. COMMENT ÇA MARCHE */}
       <section className="bg-white py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-14">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Comment Ã§a fonctionne
+              Comment ça fonctionne
             </h2>
           </div>
 
@@ -107,15 +108,15 @@ export default function LRHomeStaging() {
                 <span className="text-2xl font-bold text-black">1</span>
               </div>
               <h3 className="text-xl font-semibold mb-2">Importez votre photo</h3>
-              <p className="text-gray-600">Ajoutez une image d'une piÃ¨ce vide ou peu valorisÃ©e</p>
+              <p className="text-gray-600">Ajoutez une image d'une pièce vide ou peu valorisée</p>
             </div>
 
             <div className="text-center">
               <div className="bg-yellow-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-black">2</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">L'IA transforme votre intÃ©rieur</h3>
-              <p className="text-gray-600">Ajout de mobilier rÃ©aliste et harmonieux</p>
+              <h3 className="text-xl font-semibold mb-2">L'IA transforme votre intérieur</h3>
+              <p className="text-gray-600">Ajout de mobilier réaliste et harmonieux</p>
             </div>
 
             <div className="text-center">
@@ -123,72 +124,51 @@ export default function LRHomeStaging() {
                 <span className="text-2xl font-bold text-black">3</span>
               </div>
               <h3 className="text-xl font-semibold mb-2">Obtenez un visuel attractif</h3>
-              <p className="text-gray-600">Un rendu prÃªt Ã  convaincre acheteurs et locataires</p>
+              <p className="text-gray-600">Un rendu prêt à convaincre acheteurs et locataires</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 3. AVANT / APRÃˆS */}
+      {/* 3. AVANT / APRÈS */}
       <section id="demo" className="bg-gray-50 py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-14">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              DÃ©couvrez la transformation en quelques secondes
+              Découvrez la transformation en quelques secondes
             </h2>
             <p className="text-lg text-gray-600 leading-relaxed">
-              Un visuel plus attractif permet de dÃ©clencher le coup de cÅ“ur dÃ¨s la premiÃ¨re impression
+              Un visuel plus attractif permet de déclencher le coup de cœur dès la première impression
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-3xl overflow-hidden shadow-lg">
-              <div className="grid grid-cols-2">
-                <div>
-                  <img src="/demo/demo-avant.jpg" alt="Avant" className="w-full h-48 object-cover" />
-                  <p className="text-center py-2 text-sm font-semibold">Avant</p>
-                </div>
-                <div>
-                  <img src="/demo/demo-apres.jpg" alt="AprÃ¨s" className="w-full h-48 object-cover" />
-                  <p className="text-center py-2 text-sm font-semibold">AprÃ¨s</p>
-                </div>
-              </div>
-              <div className="p-4">
-                <p className="text-gray-700 text-sm">Salon lumineux transformÃ© en espace convivial</p>
-              </div>
-            </div>
+          <div className="space-y-12">
+            <BeforeAfterSlider
+              title="Chambre : transformation premium"
+              beforeSrc="/chambre avant.png"
+              afterSrc="/chambre avant.png"
+              beforeText="Pièce difficile à projeter et peu valorisée."
+              afterText="Une chambre chaleureuse et moderne qui donne immédiatement envie."
+              badge="Projection immédiate des acheteurs"
+            />
 
-            <div className="bg-white rounded-3xl overflow-hidden shadow-lg">
-              <div className="grid grid-cols-2">
-                <div>
-                  <img src="/avant.jpg" alt="Avant" className="w-full h-48 object-cover" />
-                  <p className="text-center py-2 text-sm font-semibold">Avant</p>
-                </div>
-                <div>
-                  <img src="/apres.jpg" alt="AprÃ¨s" className="w-full h-48 object-cover" />
-                  <p className="text-center py-2 text-sm font-semibold">AprÃ¨s</p>
-                </div>
-              </div>
-              <div className="p-4">
-                <p className="text-gray-700 text-sm">Chambre optimisÃ©e avec mobilier design</p>
-              </div>
-            </div>
+            <BeforeAfterSlider
+              title="Cuisine : espace central valorisé"
+              beforeSrc="/cuisine 2 avant apres.png"
+              afterSrc="/cuisine 2 avant apres.png"
+              beforeText="Cuisine ancienne et peu fonctionnelle."
+              afterText="Un espace moderne et lumineux pensé pour séduire immédiatement."
+              badge="Pièce centrale valorisée"
+            />
 
-            <div className="bg-white rounded-3xl overflow-hidden shadow-lg">
-              <div className="grid grid-cols-2">
-                <div>
-                  <img src="/demo/demo-avant.jpg" alt="Avant" className="w-full h-48 object-cover" />
-                  <p className="text-center py-2 text-sm font-semibold">Avant</p>
-                </div>
-                <div>
-                  <img src="/demo/demo-apres.jpg" alt="AprÃ¨s" className="w-full h-48 object-cover" />
-                  <p className="text-center py-2 text-sm font-semibold">AprÃ¨s</p>
-                </div>
-              </div>
-              <div className="p-4">
-                <p className="text-gray-700 text-sm">Cuisine moderne et fonctionnelle</p>
-              </div>
-            </div>
+            <BeforeAfterSlider
+              title="Salle de bain : montée en gamme"
+              beforeSrc="/cuisine avant apres.png"
+              afterSrc="/cuisine avant apres.png"
+              beforeText="Une salle de bain datée qui freine la perception du bien."
+              afterText="Un espace premium qui renforce immédiatement l'attractivité du logement."
+              badge="Montée en gamme visuelle"
+            />
           </div>
 
           <div className="text-center mt-12">
@@ -208,7 +188,7 @@ export default function LRHomeStaging() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-14">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Des offres simples et adaptÃ©es Ã  vos besoins
+              Des offres simples et adaptées à vos besoins
             </h2>
           </div>
 
@@ -216,13 +196,13 @@ export default function LRHomeStaging() {
             {/* STARTER */}
             <div className="border rounded-3xl p-8 text-center shadow-sm">
               <h3 className="text-xl font-semibold mb-4">Starter</h3>
-              <p className="text-4xl font-bold mb-4">9â‚¬</p>
-              <p className="text-gray-600 mb-6">10 crÃ©dits</p>
+              <p className="text-4xl font-bold mb-4">9€</p>
+              <p className="text-gray-600 mb-6">10 crédits</p>
 
               <ul className="text-sm text-gray-600 mb-8 space-y-2">
-                <li>âœ” 10 transformations</li>
-                <li>âœ” IdÃ©al pour tester</li>
-                <li>âœ” Parfait pour particuliers</li>
+                <li>&#10004; 10 transformations</li>
+                <li>&#10004; Idéal pour tester</li>
+                <li>&#10004; Parfait pour particuliers</li>
               </ul>
 
               <button 
@@ -239,13 +219,13 @@ export default function LRHomeStaging() {
                 <span className="text-sm font-bold text-black">Le plus populaire</span>
               </div>
               <h3 className="text-xl font-semibold mb-4">Pro</h3>
-              <p className="text-4xl font-bold mb-4">19â‚¬</p>
-              <p className="text-gray-600 mb-6">30 crÃ©dits</p>
+              <p className="text-4xl font-bold mb-4">19€</p>
+              <p className="text-gray-600 mb-6">30 crédits</p>
 
               <ul className="text-sm text-gray-600 mb-8 space-y-2">
-                <li>âœ” 30 transformations</li>
-                <li>âœ” Meilleur rapport qualitÃ©/prix</li>
-                <li>âœ” IdÃ©al agences et pros</li>
+                <li>&#10004; 30 transformations</li>
+                <li>&#10004; Meilleur rapport qualité/prix</li>
+                <li>&#10004; Idéal agences et pros</li>
               </ul>
 
               <button 
@@ -259,13 +239,13 @@ export default function LRHomeStaging() {
             {/* BUSINESS */}
             <div className="border rounded-3xl p-8 text-center shadow-sm">
               <h3 className="text-xl font-semibold mb-4">Business</h3>
-              <p className="text-4xl font-bold mb-4">49â‚¬</p>
-              <p className="text-gray-600 mb-6">100 crÃ©dits</p>
+              <p className="text-4xl font-bold mb-4">49€</p>
+              <p className="text-gray-600 mb-6">100 crédits</p>
 
               <ul className="text-sm text-gray-600 mb-8 space-y-2">
-                <li>âœ” 100 transformations</li>
-                <li>âœ” IdÃ©al gros volumes</li>
-                <li>âœ” Utilisation intensive</li>
+                <li>&#10004; 100 transformations</li>
+                <li>&#10004; Idéal gros volumes</li>
+                <li>&#10004; Utilisation intensive</li>
               </ul>
 
               <button 
@@ -279,7 +259,7 @@ export default function LRHomeStaging() {
 
           <div className="text-center mt-10">
             <p className="text-gray-600 text-sm">
-              1 image gratuite â€¢ Payez seulement si vous aimez
+              1 image gratuite • Payez seulement si vous aimez
             </p>
           </div>
         </div>
@@ -289,43 +269,43 @@ export default function LRHomeStaging() {
         <CreditsBalance />
       </div>
 
-      {/* 5. TÃ‰MOIGNAGES */}
+      {/* 5. TÉMOIGNAGES */}
       <section id="temoignages" className="bg-gray-50 py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-14">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Ils voient immÃ©diatement le potentiel du bien
+              Ils voient immédiatement le potentiel du bien
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-1 text-yellow-500 mb-4">
-                <span>â˜…</span>
-                <span>â˜…</span>
-                <span>â˜…</span>
-                <span>â˜…</span>
-                <span>â˜…</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
               </div>
 
               <p className="text-gray-700 mb-6 leading-relaxed">
-                "Le rendu a permis de mieux visualiser le potentiel du bien dÃ¨s la premiÃ¨re visite."
+                "Le rendu a permis de mieux visualiser le potentiel du bien dès la première visite."
               </p>
 
-              <p className="font-semibold text-gray-900">PropriÃ©taire vendeur</p>
+              <p className="font-semibold text-gray-900">Propriétaire vendeur</p>
             </div>
 
             <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-1 text-yellow-500 mb-4">
-                <span>â˜…</span>
-                <span>â˜…</span>
-                <span>â˜…</span>
-                <span>â˜…</span>
-                <span>â˜…</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
               </div>
 
               <p className="text-gray-700 mb-6 leading-relaxed">
-                "Les visuels avant/aprÃ¨s rendent l'annonce beaucoup plus attractive. Simple et rapide."
+                "Les visuels avant/après rendent l'annonce beaucoup plus attractive. Simple et rapide."
               </p>
 
               <p className="font-semibold text-gray-900">
@@ -335,15 +315,15 @@ export default function LRHomeStaging() {
 
             <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
               <div className="flex items-center gap-1 text-yellow-500 mb-4">
-                <span>â˜…</span>
-                <span>â˜…</span>
-                <span>â˜…</span>
-                <span>â˜…</span>
-                <span>â˜…</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
+                <span>★</span>
               </div>
 
               <p className="text-gray-700 mb-6 leading-relaxed">
-                "La possibilitÃ© de gÃ©nÃ©rer un intÃ©rieur rÃ©aliste en quelques secondes apporte une vraie valeur perÃ§ue."
+                "La possibilité de générer un intérieur réaliste en quelques secondes apporte une vraie valeur perçue."
               </p>
 
               <p className="font-semibold text-gray-900">Investisseur immobilier</p>
@@ -356,11 +336,11 @@ export default function LRHomeStaging() {
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-5xl mx-auto text-center">
           <p className="text-sm font-semibold uppercase tracking-wider text-yellow-400 mb-3">
-            Passez Ã  l'action
+            Passez à l'action
           </p>
 
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Testez votre photo maintenant et dÃ©clenchez le coup de cÅ“ur
+            Testez votre photo maintenant et déclenchez le coup de cœur
           </h2>
 
           <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
@@ -386,7 +366,7 @@ export default function LRHomeStaging() {
           </div>
 
           <p className="text-sm text-gray-400">
-            1 image offerte â€¢ IdÃ©al pour particuliers, agences et investisseurs
+            1 image offerte • Idéal pour particuliers, agences et investisseurs
           </p>
         </div>
       </section>
@@ -397,18 +377,18 @@ export default function LRHomeStaging() {
           <div className="grid md:grid-cols-3 gap-8">
             <div>
               <Image src="/logo/logo blanc.jpg" alt="LR HomeStaging" width={140} height={50} className="mb-4" />
-              <p className="text-gray-400">Votre expert en home staging Ã  La Rochelle</p>
+              <p className="text-gray-400">Votre expert en home staging à La Rochelle</p>
             </div>
             <div>
               <h3 className="text-xl font-semibold mb-4">Contact</h3>
-              <p className="mb-2">ðŸ“ž 06 12 34 56 78</p>
-              <p className="mb-2">ðŸ“§ contact@lr-homestaging.fr</p>
-              <p>ðŸ“ La Rochelle, France</p>
+              <p className="mb-2"> 06 12 34 56 78</p>
+              <p className="mb-2"> contact@lr-homestaging.fr</p>
+              <p> La Rochelle, France</p>
             </div>
             <div>
               <h3 className="text-xl font-semibold mb-4">Liens utiles</h3>
               <div className="space-y-2">
-                <a href="#demo" className="block hover:text-yellow-400 transition">Avant / AprÃ¨s</a>
+                <a href="#demo" className="block hover:text-yellow-400 transition">Avant / Après</a>
                 <a href="#pricing" className="block hover:text-yellow-400 transition">Tarifs</a>
                 <a href="/studio" className="block hover:text-yellow-400 transition">Outil IA</a>
                 <a href="#contact" className="block hover:text-yellow-400 transition">Contact</a>
@@ -416,7 +396,7 @@ export default function LRHomeStaging() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 LR HomeStaging. Tous droits rÃ©servÃ©s.</p>
+            <p>&copy; 2024 LR HomeStaging. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
