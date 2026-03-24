@@ -15,6 +15,7 @@ export default function LRHomeStaging() {
         </div>
         <nav className="hidden md:flex space-x-6">
           <a href="#demo" className="hover:text-yellow-600 transition">Avant / Après</a>
+          <a href="/agences" className="hover:text-yellow-600 transition">Agences</a>
           <a href="#pricing" className="hover:text-yellow-600 transition">Tarifs</a>
           <a href="#temoignages" className="hover:text-yellow-600 transition">Témoignages</a>
           <a href="/studio" className="hover:text-yellow-600 transition font-semibold text-yellow-600">Outil IA</a>
@@ -22,74 +23,47 @@ export default function LRHomeStaging() {
         </nav>
       </header>
 
-      {/* 1. HERO + GÉNÉRATEUR */}
-      <section className="relative min-h-screen bg-[url('https://images.unsplash.com/photo-1560448204-e02f11c3d0e2')] bg-cover bg-center flex items-center">
-        <div className="absolute inset-0 bg-black/60" />
+      {/* HERO OPTIMISÉ - PROJECTION PERSONNALISÉE */}
+      <section className="bg-gradient-to-b from-white to-gray-50 py-20 px-6">
+        <div className="max-w-6xl mx-auto text-center">
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-16 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            {/* COLONNE GAUCHE */}
-            <div className="text-white max-w-2xl">
-              <p className="inline-block bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm mb-6">
-                Home staging IA ultra réaliste
-              </p>
+          {/* Badge */}
+          <p className="text-sm font-semibold text-yellow-600 uppercase tracking-wider mb-4">
+            Home staging IA nouvelle génération
+          </p>
 
-              <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
-                Transformez votre photo immobilière en visuel coup de cœur en quelques secondes
-              </h1>
+          {/* Titre */}
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
+            Projetez vos meubles dans n'importe quel bien immobilier
+          </h1>
 
-              <p className="text-lg md:text-xl text-gray-200 mb-8 leading-relaxed">
-                Importez votre photo, obtenez un rendu premium, et aidez acheteurs et locataires à se projeter immédiatement.
-              </p>
+          {/* Sous titre */}
+          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+            Importez une photo et visualisez instantanément votre futur intérieur avec vos propres meubles.
+            Idéal pour acheter, louer ou vendre plus rapidement.
+          </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <a
-                  href="#generate"
-                  onClick={() => trackEvent("cta_click", { button: "hero_test_photo" })}
-                  className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-xl text-center transition"
-                >
-                  Tester votre photo maintenant
-                </a>
+          {/* CTA */}
+          <a
+            href="#projection"
+            onClick={() => trackEvent("cta_click", { button: "hero_projection" })}
+            className="inline-block bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-8 py-4 rounded-xl text-lg transition"
+          >
+            Tester ma projection maintenant
+          </a>
 
-                <a
-                  href="#demo"
-                  onClick={() => trackEvent("cta_click", { button: "hero_demo" })}
-                  className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-6 py-3 rounded-xl text-center transition"
-                >
-                  Voir un avant / après réel
-                </a>
-              </div>
-
-              <p className="text-sm text-gray-300 mb-8">
-                1 image offerte • Sans engagement • Résultat premium
-              </p>
-            </div>
-
-            {/* COLONNE DROITE */}
-            <div id="generate" className="w-full">
-              <div className="bg-white rounded-3xl shadow-2xl p-4 md:p-6">
-                <div className="mb-4">
-                  <p className="text-sm uppercase tracking-wide text-yellow-600 font-semibold mb-2">
-                    Test immédiat
-                  </p>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    Testez votre photo dès maintenant
-                  </h2>
-                  <p className="text-gray-600">
-                    Importez votre image pour obtenir un home staging premium et déclencher le coup de cœur.
-                  </p>
-                </div>
-
-                <HomeStagingGenerator />
-
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 text-center">
-                    Avant / Après instantané • Idéal pour particuliers, agences et investisseurs
-                  </p>
-                </div>
-              </div>
-            </div>
+          {/* Proof */}
+          <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+            <span>✔ 1 image offerte</span>
+            <span>✔ Sans inscription</span>
+            <span>✔ Résultat en quelques secondes</span>
           </div>
+
+        </div>
+
+        {/* Générateur DIRECT dans le hero */}
+        <div id="projection" className="mt-16 max-w-4xl mx-auto">
+          <HomeStagingGenerator />
         </div>
       </section>
 
@@ -182,6 +156,126 @@ export default function LRHomeStaging() {
           </div>
         </div>
       </section>
+
+      {/* SECTION PROJECTION PERSONNALISÉE */}
+      <section className="bg-white py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wider text-yellow-600 mb-3">
+                Projection personnalisée
+              </p>
+
+              <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                Projetez vos propres meubles dans votre futur bien
+              </h2>
+
+              <p className="text-lg text-gray-600 leading-relaxed mb-8">
+                Importez la photo d'un bien et vos propres meubles pour visualiser un
+                intérieur réaliste, rassurer les acheteurs et accélérer la décision.
+              </p>
+
+              <div className="space-y-5 mb-8">
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">
+                    1
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      Acheteurs et locataires se projettent vraiment
+                    </h3>
+                    <p className="text-gray-600">
+                      Ils visualisent le bien avec leur propre univers, pas avec une
+                      mise en scène générique.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">
+                    2
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      Les agences rassurent plus vite leurs prospects
+                    </h3>
+                    <p className="text-gray-600">
+                      Une projection personnalisée rend la visite plus concrète et
+                      plus mémorable.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">
+                    3
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      La décision devient plus simple
+                    </h3>
+                    <p className="text-gray-600">
+                      Quand le futur occupant se projette mieux, le bien gagne
+                      immédiatement en valeur perçue.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <a
+                href="#projection"
+                onClick={() => trackEvent("cta_click", { button: "projection_cta" })}
+                className="inline-block bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-8 py-4 rounded-xl transition"
+              >
+                Tester avec mes meubles
+              </a>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-3xl p-6 shadow-sm">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-2">
+                    Photo du bien
+                  </p>
+                  <div className="aspect-[4/3] rounded-2xl bg-gray-200 overflow-hidden">
+                    <img
+                      src="/chambre avant.png"
+                      alt="Photo du bien"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium text-gray-500 mb-2">
+                    Projection avec vos meubles
+                  </p>
+                  <div className="aspect-[4/3] rounded-2xl bg-gray-100 overflow-hidden">
+                    <img
+                      src="/cuisine 2 avant apres.png"
+                      alt="Projection personnalisée"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-2xl bg-white border border-gray-200 p-5">
+                <p className="text-sm text-gray-500 mb-2">Cas d'usage</p>
+                <p className="text-gray-800 font-medium leading-relaxed">
+                  Idéal pour un acheteur qui souhaite voir son canapé, sa table ou son
+                  style de décoration directement dans le bien avant de prendre sa
+                  décision.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="projection" className="max-w-4xl mx-auto mt-10 px-4">
+        <HomeStagingGenerator />
+      </div>
 
       {/* 4. TARIFS */}
       <section id="pricing" className="bg-white py-20 px-6">
