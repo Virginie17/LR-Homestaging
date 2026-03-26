@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("STRIPE_SECRET_KEY is required");
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 function getBaseUrl() {
   const baseUrl = process.env.APP_BASE_URL;
@@ -26,6 +31,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "email requis." }, { status: 400 });
     }
 
+    const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: email,

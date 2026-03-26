@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("STRIPE_SECRET_KEY is required");
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 function getCreditsForPrice(priceId: string) {
   const starterId = process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID;
@@ -18,6 +23,7 @@ function getCreditsForPrice(priceId: string) {
 
 export async function POST(req: NextRequest) {
   const supabaseAdmin = getSupabaseAdmin();
+  const stripe = getStripe();
   try {
     const signature = req.headers.get("stripe-signature");
     if (!signature) {
