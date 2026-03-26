@@ -13,6 +13,7 @@ export default function HomeStagingGenerator() {
   const [mode, setMode] = useState<"homeStaging" | "projection">("projection");
   const [loadingStep, setLoadingStep] = useState<string>("");
   const [progress, setProgress] = useState(0);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const previewUrl = useMemo(() => {
     if (!file) return null;
@@ -24,6 +25,7 @@ export default function HomeStagingGenerator() {
     setFile(selectedFile);
     setResult(null);
     setError(null);
+    setShowPaywall(false);
   };
 
   const handleUpload = async () => {
@@ -32,12 +34,20 @@ export default function HomeStagingGenerator() {
       return;
     }
 
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    const isLoggedIn = Boolean(session?.access_token);
+    const accessToken = session?.access_token || null;
+
     // Vérifier si l'essai gratuit a déjà été utilisé
     const hasUsedFree = localStorage.getItem(FREE_TRY_KEY);
     
     setLoading(true);
     setError(null);
     setProgress(0);
+    setShowPaywall(false);
 
     // Simulation des étapes de loading selon le mode
     const homeStagingSteps = [
@@ -65,22 +75,25 @@ export default function HomeStagingGenerator() {
     }
 
     try {
-      // Si essai gratuit déjà utilisé, rediriger vers tarifs
-      if (hasUsedFree) {
-        setError("Votre essai gratuit a été utilisé. Choisissez un pack pour continuer.");
-        setTimeout(() => {
-          window.location.href = "#pricing";
-        }, 2000);
+      // Non connecté + essai déjà utilisé => paywall (sans re-générer)
+      if (!isLoggedIn && hasUsedFree) {
+        setShowPaywall(true);
         return;
       }
 
-      // ZERO FRICTION : Utiliser la route gratuite pour le premier essai
       const formData = new FormData();
       formData.append("file", file);
       formData.append("mode", mode);
 
-      const res = await fetch("/api/generate-free", {
+      const endpoint = isLoggedIn ? "/api/generate" : "/api/generate-free";
+
+      const headers: HeadersInit | undefined = isLoggedIn && accessToken
+        ? { Authorization: `Bearer ${accessToken}` }
+        : undefined;
+
+      const res = await fetch(endpoint, {
         method: "POST",
+        headers,
         body: formData,
       });
 
@@ -103,11 +116,18 @@ export default function HomeStagingGenerator() {
         throw new Error("Aucune image générée n'a été retournée.");
       }
 
-      // Marquer l'essai gratuit comme utilisé
-      localStorage.setItem(FREE_TRY_KEY, "true");
+      // Marquer l'essai gratuit comme utilisé uniquement si non connecté
+      if (!isLoggedIn) {
+        localStorage.setItem(FREE_TRY_KEY, "true");
+      }
       
       setProgress(100);
       setResult(data.imageUrl);
+
+      // Après un résultat gratuit, on propose de continuer (paywall intelligent)
+      if (!isLoggedIn) {
+        setShowPaywall(true);
+      }
     } catch (err: any) {
       setError(err?.message || "Erreur serveur.");
     } finally {
@@ -288,40 +308,65 @@ export default function HomeStagingGenerator() {
             </div>
           </div>
 
-          <div className="mt-8 rounded-3xl bg-black text-white p-6 md:p-8 text-center">
-            <p className="text-sm uppercase tracking-wider text-yellow-400 font-semibold mb-3">
-              Résultat généré
-            </p>
+          {showPaywall && (
+            <div className="mt-8 rounded-3xl bg-black text-white p-6 md:p-8 text-center">
+              <p className="text-sm uppercase tracking-wider text-yellow-400 font-semibold mb-3">
+                Vous avez vu le potentiel
+              </p>
 
-            <h3 className="text-2xl md:text-3xl font-bold mb-4">
-              Votre transformation est prête
-            </h3>
+              <h3 className="text-2xl md:text-3xl font-bold mb-4">
+                Continuez avec vos images
+              </h3>
 
-            <p className="text-gray-300 max-w-2xl mx-auto mb-6">
-              Vous avez vu le potentiel de votre bien. Créez votre compte pour
-              continuer vos transformations et accéder à tous vos rendus premium.
-            </p>
+              <p className="text-gray-300 max-w-2xl mx-auto mb-6">
+                Débloquez vos prochains rendus premium (et gardez l’accès à votre historique).
+              </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="#account"
-                className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-xl transition"
-              >
-                Créer mon compte
-              </a>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-6">
+                <a
+                  href="#pricing"
+                  className="rounded-2xl border border-white/15 bg-white/10 hover:bg-white/15 p-5 text-left transition"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-bold">Starter</p>
+                    <span className="text-yellow-400 font-extrabold">9€</span>
+                  </div>
+                  <p className="text-sm text-gray-300">10 crédits • Idéal pour tester sur plusieurs pièces</p>
+                </a>
 
-              <a
-                href="#pricing"
-                className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-6 py-3 rounded-xl transition"
-              >
-                Voir les offres
-              </a>
+                <a
+                  href="#pricing"
+                  className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 hover:bg-yellow-500/15 p-5 text-left transition"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-bold">Pro</p>
+                    <span className="text-yellow-400 font-extrabold">19€</span>
+                  </div>
+                  <p className="text-sm text-gray-300">30 crédits • Meilleur rapport qualité/prix</p>
+                </a>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="#pricing"
+                  className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-xl transition"
+                >
+                  Continuer avec mes images
+                </a>
+
+                <a
+                  href="#projection"
+                  className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-6 py-3 rounded-xl transition"
+                >
+                  Essayer la projection meubles
+                </a>
+              </div>
+
+              <p className="text-sm text-gray-400 mt-4">
+                1 image offerte • Sans engagement • Paiement sécurisé
+              </p>
             </div>
-
-            <p className="text-sm text-gray-400 mt-4">
-              1 image offerte • Sans engagement • Résultat premium
-            </p>
-          </div>
+          )}
         </>
       )}
 

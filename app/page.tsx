@@ -52,13 +52,15 @@ export default function HomePage() {
             </p>
 
             <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
-              Transformez n'importe quel bien en coup de cœur instantané grâce à l'IA
+              Transformez votre bien en coup de cœur en 15 secondes
             </h1>
 
-            <p className="text-lg md:text-xl text-gray-600 leading-relaxed mb-6 max-w-2xl">
-              Home staging automatique + projection de vos propres meubles dans
-              n'importe quel espace pour aider acheteurs, locataires et agences
-              à se projeter immédiatement.
+            <p className="text-lg md:text-xl text-gray-600 leading-relaxed mb-3 max-w-2xl">
+              Importez une photo → obtenez un rendu ultra réaliste → déclenchez la projection
+            </p>
+
+            <p className="text-sm font-semibold text-gray-900 mb-6">
+              Visualisez aussi le bien avec <span className="underline">vos meubles</span> avant d’acheter
             </p>
 
             <p className="text-sm text-gray-500 mb-8">
@@ -112,6 +114,17 @@ export default function HomePage() {
           </div>
 
           <div id="generate" className="space-y-6">
+            <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-4 md:p-6">
+              <BeforeAfterSlider
+                title="Avant / Après immédiat"
+                beforeSrc="/demo/demo-avant.jpg"
+                afterSrc="/demo/demo-apres.jpg"
+                beforeText="Avant : pièce difficile à projeter"
+                afterText="Après : rendu vendeur qui déclenche le coup de cœur"
+                badge="Résultat en quelques secondes"
+              />
+            </div>
+
             <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 p-4 md:p-6">
               <div className="mb-4">
                 <p className="text-sm uppercase tracking-wide text-yellow-600 font-semibold mb-2">
