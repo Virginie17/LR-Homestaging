@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { supabaseAdmin } from "@/lib/supabase-admin";
+import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -17,6 +17,7 @@ function getCreditsForPrice(priceId: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin();
   try {
     const signature = req.headers.get("stripe-signature");
     if (!signature) {
@@ -55,13 +56,14 @@ export async function POST(req: NextRequest) {
           .single();
 
         if (existingUser) {
+          // @ts-ignore
           await supabaseAdmin
             .from("users")
             .update({
-              credits: (existingUser.credits || 0) + creditsToAdd,
+              credits: (existingUser.credits as number || 0) + creditsToAdd,
               stripe_customer_id: session.customer?.toString() || null,
               updated_at: new Date().toISOString(),
-            })
+            } as any)
             .eq("id", userId);
 
           return NextResponse.json({ received: true });
@@ -76,14 +78,15 @@ export async function POST(req: NextRequest) {
           .single();
 
         if (existingByEmail) {
+          // @ts-ignore
           await supabaseAdmin
             .from("users")
             .update({
-              credits: (existingByEmail.credits || 0) + creditsToAdd,
+              credits: (existingByEmail.credits as number || 0) + creditsToAdd,
               stripe_customer_id: session.customer?.toString() || null,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", existingByEmail.id);
+            .eq("id", existingByEmail.id as string);
         }
       }
     }
