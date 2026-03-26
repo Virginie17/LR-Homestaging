@@ -1,295 +1,157 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import HomeStagingGenerator from "./components/HomeStagingGenerator";
+import ProjectionGenerator from "./components/ProjectionGenerator";
 import CreditsBalance from "./components/CreditsBalance";
+import StripeCheckoutButton from "./components/StripeCheckoutButton";
 import BeforeAfterSlider from "./components/BeforeAfterSlider";
-import { trackEvent } from "../lib/analytics";
 
-export default function LRHomeStaging() {
+export default function HomePage() {
   return (
-    <div className="font-sans text-gray-900">
-      <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md">
-        <div className="flex items-center">
-          <Image src="/logo/logo noir.png" alt="LR HomeStaging" width={140} height={50} />
-        </div>
-        <nav className="hidden md:flex space-x-6">
-          <a href="#demo" className="hover:text-yellow-600 transition">Avant / Après</a>
-          <a href="/agences" className="hover:text-yellow-600 transition">Agences</a>
-          <a href="#pricing" className="hover:text-yellow-600 transition">Tarifs</a>
-          <a href="#temoignages" className="hover:text-yellow-600 transition">Témoignages</a>
-          <a href="/studio" className="hover:text-yellow-600 transition font-semibold text-yellow-600">Outil IA</a>
-          <a href="#contact" className="hover:text-yellow-600 transition">Contact</a>
-        </nav>
-      </header>
-
-      {/* HERO MACHINE À CONVERTIR */}
-      <section className="bg-gradient-to-b from-white to-gray-50 py-20 px-6">
-        <div className="max-w-6xl mx-auto text-center">
-
-          {/* Badge urgence accentué */}
-          <p className="text-sm font-bold text-red-600 uppercase tracking-wider mb-4 animate-pulse">
-            🔥 OFFRE LANCEMENT LIMITÉE - 1 image gratuite
-          </p>
-
-          {/* Titre agressif */}
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6">
-            Transformez votre bien en coup de cœur en 15 secondes
-          </h1>
-
-          {/* Sous-texte stratégique */}
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-            Importez une photo → obtenez un rendu ultra réaliste → déclenchez la projection
-          </p>
-
-          {/* Preuve sociale forte */}
-          <div className="flex justify-center gap-8 mb-8 text-sm text-gray-700">
-            <div className="flex items-center gap-2">
-              <span className="text-3xl font-bold text-black">+127</span>
-              <span>biens transformés</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-3xl font-bold text-black">92%</span>
-              <span>trouvent le rendu plus attractif</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-3xl font-bold text-black">4.9⭐</span>
-              <span>note moyenne</span>
-            </div>
-          </div>
-
-          {/* CTA ultra agressif */}
-          <a
-            href="#projection"
-            onClick={() => trackEvent("cta_click", { button: "hero_conversion" })}
-            className="inline-block bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-10 py-5 rounded-xl text-lg transition transform hover:scale-105 shadow-lg"
-          >
-            🚀 Tester votre photo maintenant
+    <main className="bg-white text-gray-900">
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <a href="#" className="flex items-center gap-3">
+            <Image
+              src="/logo/logo noir.png"
+              alt="LR Homestaging"
+              width={150}
+              height={42}
+              className="h-auto w-auto"
+            />
           </a>
 
-          {/* Micro copy stratégique avec urgence */}
-          <p className="text-sm text-gray-500 mt-4">
-            ⚡ Aucun engagement – résultat en quelques secondes – Offre expire bientôt
-          </p>
-        </div>
-
-        {/* WOW IMMÉDIAT - Slider avant/après sous le titre */}
-        <div className="max-w-4xl mx-auto mt-8">
-          <BeforeAfterSlider
-            title="Projection avec vos meubles en 15 secondes"
-            beforeSrc="/chambre avant.png"
-            afterSrc="/cuisine 2 avant apres.png"
-            beforeText="Bien difficile à projeter pour les acheteurs"
-            afterText="Espace chaleureux et vendeur qui déclenche le coup de cœur"
-            badge="+85% d'attractivité perçue"
-          />
-        </div>
-
-        {/* Générateur DIRECT dans le hero */}
-        <div id="projection" className="max-w-4xl mx-auto mt-8">
-          <HomeStagingGenerator />
-        </div>
-      </section>
-
-      {/* 2. COMMENT ÇA MARCHE */}
-      <section className="bg-white py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Comment ça fonctionne
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="bg-yellow-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-black">1</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Importez votre photo</h3>
-              <p className="text-gray-600">Ajoutez une image d'une pièce vide ou peu valorisée</p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-yellow-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-black">2</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">L'IA transforme votre intérieur</h3>
-              <p className="text-gray-600">Ajout de mobilier réaliste et harmonieux</p>
-            </div>
-
-            <div className="text-center">
-              <div className="bg-yellow-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-black">3</span>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Obtenez un visuel attractif</h3>
-              <p className="text-gray-600">Un rendu prêt à convaincre acheteurs et locataires</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. AVANT / APRÈS */}
-      <section id="demo" className="bg-gray-50 py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Découvrez la transformation en quelques secondes
-            </h2>
-            <p className="text-lg text-gray-600 leading-relaxed">
-              Un visuel plus attractif permet de déclencher le coup de cœur dès la première impression
-            </p>
-          </div>
-
-          <div className="space-y-12">
-            <BeforeAfterSlider
-              title="Chambre : transformation premium"
-              beforeSrc="/chambre avant.png"
-              afterSrc="/chambre avant.png"
-              beforeText="Pièce difficile à projeter et peu valorisée."
-              afterText="Une chambre chaleureuse et moderne qui donne immédiatement envie."
-              badge="Projection immédiate des acheteurs"
-            />
-
-            <BeforeAfterSlider
-              title="Cuisine : espace central valorisé"
-              beforeSrc="/cuisine 2 avant apres.png"
-              afterSrc="/cuisine 2 avant apres.png"
-              beforeText="Cuisine ancienne et peu fonctionnelle."
-              afterText="Un espace moderne et lumineux pensé pour séduire immédiatement."
-              badge="Pièce centrale valorisée"
-            />
-
-            <BeforeAfterSlider
-              title="Salle de bain : montée en gamme"
-              beforeSrc="/cuisine avant apres.png"
-              afterSrc="/cuisine avant apres.png"
-              beforeText="Une salle de bain datée qui freine la perception du bien."
-              afterText="Un espace premium qui renforce immédiatement l'attractivité du logement."
-              badge="Montée en gamme visuelle"
-            />
-          </div>
-
-          <div className="text-center mt-12">
-            <a
-              href="#generate"
-              onClick={() => trackEvent("cta_click", { button: "demo_test" })}
-              className="inline-block bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-8 py-4 rounded-xl transition"
-            >
-              Tester maintenant
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
+            <a href="#generate" className="hover:text-yellow-600 transition">
+              Tester
             </a>
-          </div>
+            <a href="#demo" className="hover:text-yellow-600 transition">
+              Avant / Après
+            </a>
+            <a href="#projection" className="hover:text-yellow-600 transition">
+              Vos meubles
+            </a>
+            <a href="#pricing" className="hover:text-yellow-600 transition">
+              Tarifs
+            </a>
+            <a href="#agences" className="hover:text-yellow-600 transition">
+              Agences
+            </a>
+          </nav>
         </div>
-      </section>
+      </header>
 
-      {/* SECTION PROJECTION PERSONNALISÉE */}
-      <section className="bg-white py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wider text-yellow-600 mb-3">
-                Projection personnalisée
-              </p>
+      {/* HERO */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-white to-gray-50 py-20 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="inline-block bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-full px-4 py-2 text-sm font-semibold mb-5">
+              Offre de lancement : 1 image offerte
+            </p>
 
-              <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                Projetez vos propres meubles dans votre futur bien
-              </h2>
+            <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
+              Transformez n'importe quel bien en coup de cœur instantané grâce à l'IA
+            </h1>
 
-              <p className="text-lg text-gray-600 leading-relaxed mb-8">
-                Importez la photo d'un bien et vos propres meubles pour visualiser un
-                intérieur réaliste, rassurer les acheteurs et accélérer la décision.
-              </p>
+            <p className="text-lg md:text-xl text-gray-600 leading-relaxed mb-6 max-w-2xl">
+              Home staging automatique + projection de vos propres meubles dans
+              n'importe quel espace pour aider acheteurs, locataires et agences
+              à se projeter immédiatement.
+            </p>
 
-              <div className="space-y-5 mb-8">
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">
-                    1
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      Acheteurs et locataires se projettent vraiment
-                    </h3>
-                    <p className="text-gray-600">
-                      Ils visualisent le bien avec leur propre univers, pas avec une
-                      mise en scène générique.
-                    </p>
-                  </div>
-                </div>
+            <p className="text-sm text-gray-500 mb-8">
+              +500 transformations générées • Utilisé par particuliers, investisseurs et professionnels de l'immobilier
+            </p>
 
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">
-                    2
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      Les agences rassurent plus vite leurs prospects
-                    </h3>
-                    <p className="text-gray-600">
-                      Une projection personnalisée rend la visite plus concrète et
-                      plus mémorable.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">
-                    3
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      La décision devient plus simple
-                    </h3>
-                    <p className="text-gray-600">
-                      Quand le futur occupant se projette mieux, le bien gagne
-                      immédiatement en valeur perçue.
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+              <a
+                href="#generate"
+                className="inline-block bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-8 py-4 rounded-xl text-center transition"
+              >
+                Tester votre photo maintenant
+              </a>
 
               <a
-                href="#projection"
-                onClick={() => trackEvent("cta_click", { button: "projection_cta" })}
-                className="inline-block bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-8 py-4 rounded-xl transition"
+                href="#demo"
+                className="inline-block bg-black hover:bg-gray-800 text-white font-semibold px-8 py-4 rounded-xl text-center transition"
               >
-                Tester avec mes meubles
+                Voir les transformations
               </a>
             </div>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-3xl p-6 shadow-sm">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-2">
-                    Photo du bien
-                  </p>
-                  <div className="aspect-[4/3] rounded-2xl bg-gray-200 overflow-hidden">
-                    <img
-                      src="/chambre avant.png"
-                      alt="Photo du bien"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
+            <div className="flex flex-wrap gap-5 text-sm text-gray-500 mb-10">
+              <span>✔ 1 image gratuite</span>
+              <span>✔ Sans inscription</span>
+              <span>✔ Résultat en quelques secondes</span>
+            </div>
 
-                <div>
-                  <p className="text-sm font-medium text-gray-500 mb-2">
-                    Projection avec vos meubles
-                  </p>
-                  <div className="aspect-[4/3] rounded-2xl bg-gray-100 overflow-hidden">
-                    <img
-                      src="/cuisine 2 avant apres.png"
-                      alt="Projection personnalisée"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                <p className="font-semibold mb-1">Rapide</p>
+                <p className="text-sm text-gray-600">
+                  Importez une photo et obtenez un rendu attractif immédiatement.
+                </p>
               </div>
 
-              <div className="mt-6 rounded-2xl bg-white border border-gray-200 p-5">
-                <p className="text-sm text-gray-500 mb-2">Cas d'usage</p>
-                <p className="text-gray-800 font-medium leading-relaxed">
-                  Idéal pour un acheteur qui souhaite voir son canapé, sa table ou son
-                  style de décoration directement dans le bien avant de prendre sa
-                  décision.
+              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                <p className="font-semibold mb-1">Réaliste</p>
+                <p className="text-sm text-gray-600">
+                  Volumes, murs et perspectives respectés pour un rendu crédible.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+                <p className="font-semibold mb-1">Vendeur</p>
+                <p className="text-sm text-gray-600">
+                  Des visuels qui aident vraiment à se projeter et à décider.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div id="generate" className="space-y-6">
+            <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 p-4 md:p-6">
+              <div className="mb-4">
+                <p className="text-sm uppercase tracking-wide text-yellow-600 font-semibold mb-2">
+                  Test immédiat
+                </p>
+                <h2 className="text-2xl font-bold mb-2">
+                  Testez votre photo dès maintenant
+                </h2>
+                <p className="text-gray-600">
+                  Ajoutez une photo de votre bien et laissez l'IA créer un rendu professionnel.
+                </p>
+              </div>
+
+              <HomeStagingGenerator />
+
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <p className="text-sm text-gray-500 text-center">
+                  Avant / Après instantané • Home staging rapide • Projection personnalisée
+                </p>
+              </div>
+            </div>
+
+            <div className="rounded-3xl overflow-hidden border border-gray-200 shadow-sm bg-white">
+              <div className="relative aspect-[16/10]">
+                <Image
+                  src="/demo/visuel-signature2.png"
+                  alt="Projection avec vos propres meubles"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-5">
+                <p className="text-sm font-semibold text-yellow-600 uppercase tracking-wide mb-2">
+                  Visuel signature
+                </p>
+                <h3 className="text-xl font-bold mb-2">
+                  Projetez vos propres meubles dans votre futur bien
+                </h3>
+                <p className="text-gray-600">
+                  Visualisez votre canapé, votre table et votre style directement dans le bien avant d'acheter.
                 </p>
               </div>
             </div>
@@ -297,316 +159,543 @@ export default function LRHomeStaging() {
         </div>
       </section>
 
-      <div id="projection" className="max-w-4xl mx-auto mt-10 px-4">
-        <HomeStagingGenerator />
-      </div>
+      {/* COMPTE */}
+      <section className="py-10 px-6 bg-white">
+        <div id="account" className="max-w-md mx-auto">
+          <CreditsBalance />
+        </div>
+      </section>
 
-      {/* 4. TARIFS */}
-      <section id="pricing" className="bg-white py-20 px-6">
+      {/* COMMENT CA MARCHE */}
+      <section className="bg-white py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Des offres simples et adaptées à vos besoins
+            <p className="text-sm font-semibold uppercase tracking-wider text-yellow-600 mb-3">
+              Comment ça fonctionne
+            </p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+              Un parcours simple pour obtenir un rendu premium
             </h2>
+            <p className="text-lg text-gray-600">
+              Quelques clics suffisent pour valoriser un bien ou aider un prospect à se projeter.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {/* PACK VENTE RAPIDE - NOUVEAU */}
-            <div className="border-2 border-red-500 rounded-3xl p-6 text-center shadow-lg bg-red-50 relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                LE PLUS VENDU
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="rounded-3xl bg-gray-50 p-6 border border-gray-200">
+              <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold mb-4">
+                1
               </div>
-              <h3 className="text-lg font-bold mb-2">Vente Rapide</h3>
-              <p className="text-3xl font-bold mb-2">29€</p>
-              <p className="text-gray-600 text-sm mb-4">5 visuels optimisés</p>
+              <h3 className="text-xl font-semibold mb-3">Importez votre photo</h3>
+              <p className="text-gray-600">
+                Ajoutez une pièce vide, datée ou peu valorisée.
+              </p>
+            </div>
 
-              <ul className="text-xs text-gray-600 mb-6 space-y-1">
-                <li>✓ 5 transformations premium</li>
-                <li>✓ Optimisés pour annonce</li>
-                <li>✓ Support prioritaire</li>
-                <li>✓ Livraison 24h</li>
+            <div className="rounded-3xl bg-gray-50 p-6 border border-gray-200">
+              <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold mb-4">
+                2
+              </div>
+              <h3 className="text-xl font-semibold mb-3">L'IA met en scène</h3>
+              <p className="text-gray-600">
+                Mobilier, ambiance, lumière et harmonie sont générés de façon réaliste.
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-gray-50 p-6 border border-gray-200">
+              <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold mb-4">
+                3
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Le coup de cœur démarre</h3>
+              <p className="text-gray-600">
+                Un visuel plus vendeur aide à la projection et accélère la décision.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* VISUELS PREMIUM */}
+      <section className="bg-gray-50 py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <p className="text-sm font-semibold uppercase tracking-wider text-yellow-600 mb-3">
+              Visuels premium
+            </p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+              Des transformations qui renforcent immédiatement l'attractivité du bien
+            </h2>
+            <p className="text-lg text-gray-600">
+              Trois pièces clés pour créer une première impression forte et rassurante.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <article className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="relative aspect-[4/3]">
+                <Image
+                  src="/demo/chambre-premium.png"
+                  alt="Visuel premium chambre"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-2xl font-bold mb-3">Chambre</h3>
+                <p className="font-semibold text-gray-900 mb-2">
+                  Transformez une chambre vide en coup de cœur instantané
+                </p>
+                <p className="text-gray-600">
+                  En quelques secondes, notre IA crée un espace chaleureux qui aide les acheteurs à se projeter immédiatement.
+                </p>
+              </div>
+            </article>
+
+            <article className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="relative aspect-[4/3]">
+                <Image
+                  src="/demo/cuisine-premium.png"
+                  alt="Visuel premium cuisine"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-2xl font-bold mb-3">Cuisine</h3>
+                <p className="font-semibold text-gray-900 mb-2">
+                  Révélez le potentiel caché de votre cuisine
+                </p>
+                <p className="text-gray-600">
+                  Modernisez visuellement n'importe quelle cuisine pour séduire dès la première visite.
+                </p>
+              </div>
+            </article>
+
+            <article className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="relative aspect-[4/3]">
+                <Image
+                  src="/demo/sdb-premium.png"
+                  alt="Visuel premium salle de bain"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-2xl font-bold mb-3">Salle de bain</h3>
+                <p className="font-semibold text-gray-900 mb-2">
+                  Une salle de bain qui déclenche le coup de cœur
+                </p>
+                <p className="text-gray-600">
+                  Créez une ambiance premium et rassurante sans rénover pour améliorer la perception du bien.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      {/* AVANT / APRES */}
+      <section id="demo" className="bg-white py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <p className="text-sm font-semibold uppercase tracking-wider text-yellow-600 mb-3">
+              Avant / Après
+            </p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+              Découvrez la transformation en quelques secondes
+            </h2>
+            <p className="text-lg text-gray-600">
+              Une image plus attractive change immédiatement la perception d'un bien.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-10">
+            <BeforeAfterSlider
+              title="Chambre : transformation douce et moderne"
+              beforeSrc="/demo/demo-avant.jpg"
+              afterSrc="/demo/demo-apres.jpg"
+              beforeText="Pièce difficile à projeter et peu valorisée."
+              afterText="Une chambre chaleureuse et moderne qui donne immédiatement envie."
+              badge="Projection immédiate des acheteurs"
+            />
+
+            <BeforeAfterSlider
+              title="Cuisine : espace plus lumineux et plus séduisant"
+              beforeSrc="/demo/demo-avant.jpg"
+              afterSrc="/demo/demo-apres.jpg"
+              beforeText="Cuisine ancienne et peu fonctionnelle."
+              afterText="Un espace moderne et lumineux pensé pour séduire immédiatement."
+              badge="Pièce centrale valorisée"
+            />
+
+            <BeforeAfterSlider
+              title="Salle de bain : montée en gamme visuelle"
+              beforeSrc="/demo/demo-avant.jpg"
+              afterSrc="/demo/demo-apres.jpg"
+              beforeText="Une salle de bain datée qui freine la perception du bien."
+              afterText="Un espace premium qui renforce immédiatement l'attractivité du logement."
+              badge="Montée en gamme visuelle"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* PROJECTION AVEC MEUBLES */}
+      <section className="bg-gray-50 py-20 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wider text-yellow-600 mb-3">
+              Projection personnalisée
+            </p>
+
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
+              Projetez vos propres meubles dans votre futur bien
+            </h2>
+
+            <p className="text-lg text-gray-600 leading-relaxed mb-8">
+              Importez la photo d'un bien et vos meubles pour visualiser un intérieur réaliste, rassurer les acheteurs et accélérer la décision.
+            </p>
+
+            <div className="space-y-5 mb-8">
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">
+                  1
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-1">
+                    Acheteurs et locataires se projettent vraiment
+                  </h3>
+                  <p className="text-gray-600">
+                    Ils visualisent le bien avec leur propre univers, pas avec une mise en scène générique.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">
+                  2
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-1">
+                    Les agences rassurent plus vite leurs prospects
+                  </h3>
+                  <p className="text-gray-600">
+                    Une projection personnalisée rend la visite plus concrète et plus mémorable.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold shrink-0">
+                  3
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-1">
+                    La décision devient plus simple
+                  </h3>
+                  <p className="text-gray-600">
+                    Quand le futur occupant se projette mieux, le bien gagne immédiatement en valeur perçue.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <a
+              href="#projection"
+              className="inline-block bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-8 py-4 rounded-xl transition"
+            >
+              Tester avec mes meubles
+            </a>
+          </div>
+
+          <div className="space-y-6">
+            <div className="rounded-3xl overflow-hidden border border-gray-200 shadow-sm bg-white">
+              <div className="relative aspect-[16/10]">
+                <Image
+                  src="/demo/visuel-signature2.png"
+                  alt="Photo du bien, meubles du client, projection finale"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <p className="text-sm font-semibold text-yellow-600 uppercase tracking-wide mb-2">
+                  Visuel signature
+                </p>
+                <h3 className="text-2xl font-bold mb-3">
+                  Avant même d'acheter, voyez déjà votre futur chez vous
+                </h3>
+                <p className="text-gray-600">
+                  Photo du bien + meubles du client + projection finale : la façon la plus concrète de se projeter avant une décision immobilière.
+                </p>
+              </div>
+            </div>
+
+            <div id="projection" className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
+              <div className="mb-5">
+                <p className="text-sm uppercase tracking-wide text-yellow-600 font-semibold mb-2">
+                  Démo projection
+                </p>
+                <h3 className="text-2xl font-bold mb-2">
+                  Visualisez le bien avec vos meubles
+                </h3>
+                <p className="text-gray-600">
+                  Idéal pour les acheteurs, locataires et agences qui veulent une projection plus réaliste.
+                </p>
+              </div>
+
+              <ProjectionGenerator />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TARIFS */}
+      <section id="pricing" className="bg-white py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <p className="text-sm font-semibold uppercase tracking-wider text-yellow-600 mb-3">
+              Tarifs
+            </p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+              Des offres simples et adaptées à vos besoins
+            </h2>
+            <p className="text-lg text-gray-600">
+              Commencez gratuitement, puis choisissez le pack adapté à votre usage.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="border border-gray-200 rounded-3xl p-8 text-center shadow-sm">
+              <h3 className="text-xl font-semibold mb-4">Starter</h3>
+              <p className="text-4xl font-bold mb-4">9€</p>
+              <p className="text-gray-600 mb-6">10 crédits</p>
+
+              <ul className="text-sm text-gray-600 mb-8 space-y-2">
+                <li>✔ 10 transformations</li>
+                <li>✔ Qualité premium</li>
+                <li>✔ Essai idéal</li>
               </ul>
 
-              <button 
-                onClick={() => trackEvent("cta_click", { button: "pricing_vente_rapide" })}
-                className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold"
-              >
+              <StripeCheckoutButton
+                priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID || ""}
+                label="Choisir Starter"
+              />
+            </div>
+
+            <div className="border-2 border-yellow-500 rounded-3xl p-8 text-center shadow-lg relative">
+              <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-500 text-black text-sm px-4 py-1 rounded-full font-semibold">
+                Le plus populaire
+              </span>
+
+              <h3 className="text-xl font-semibold mb-4">Pro</h3>
+              <p className="text-4xl font-bold mb-4">19€</p>
+              <p className="text-gray-600 mb-6">30 crédits</p>
+
+              <ul className="text-sm text-gray-600 mb-8 space-y-2">
+                <li>✔ 30 transformations</li>
+                <li>✔ Meilleur rapport qualité / prix</li>
+                <li>✔ Idéal agences et pros</li>
+              </ul>
+
+              <StripeCheckoutButton
+                priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID || ""}
+                label="Choisir Pro"
+              />
+            </div>
+
+            <div className="border border-gray-200 rounded-3xl p-8 text-center shadow-sm">
+              <h3 className="text-xl font-semibold mb-4">Business</h3>
+              <p className="text-4xl font-bold mb-4">49€</p>
+              <p className="text-gray-600 mb-6">100 crédits</p>
+
+              <ul className="text-sm text-gray-600 mb-8 space-y-2">
+                <li>✔ 100 transformations</li>
+                <li>✔ Gros volumes</li>
+                <li>✔ Utilisation intensive</li>
+              </ul>
+
+              <StripeCheckoutButton
+                priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID || ""}
+                label="Choisir Business"
+              />
+            </div>
+
+            <div className="border border-black rounded-3xl p-8 text-center shadow-sm bg-black text-white">
+              <h3 className="text-xl font-semibold mb-4">Vente Rapide</h3>
+              <p className="text-4xl font-bold mb-4">29€</p>
+              <p className="text-gray-300 mb-6">5 visuels optimisés</p>
+
+              <ul className="text-sm text-gray-300 mb-8 space-y-2">
+                <li>✔ 5 pièces optimisées pour annonce</li>
+                <li>✔ Home staging premium</li>
+                <li>✔ Idéal pour un bien à relancer</li>
+              </ul>
+
+              <button className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-xl transition">
                 Choisir Vente Rapide
-              </button>
-            </div>
-
-            {/* STARTER */}
-            <div className="border rounded-3xl p-6 text-center shadow-sm">
-              <h3 className="text-lg font-semibold mb-2">Starter</h3>
-              <p className="text-2xl font-bold mb-2">9€</p>
-              <p className="text-gray-600 text-sm mb-4">10 crédits</p>
-
-              <ul className="text-xs text-gray-600 mb-6 space-y-1">
-                <li>✓ 10 transformations</li>
-                <li>✓ Idéal pour débuter</li>
-                <li>✓ Sans engagement</li>
-              </ul>
-
-              <button 
-                onClick={() => trackEvent("cta_click", { button: "pricing_starter" })}
-                className="w-full bg-black text-white py-2 rounded-lg text-sm"
-              >
-                Choisir Starter
-              </button>
-            </div>
-
-            {/* PRO */}
-            <div className="border-2 border-yellow-500 rounded-3xl p-6 text-center shadow-sm relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold">
-                POPULAIRE
-              </div>
-              <h3 className="text-lg font-bold mb-2">Pro</h3>
-              <p className="text-2xl font-bold mb-2">19€</p>
-              <p className="text-gray-600 text-sm mb-4">30 crédits</p>
-
-              <ul className="text-xs text-gray-600 mb-6 space-y-1">
-                <li>✓ 30 transformations</li>
-                <li>✓ Meilleur rapport qualité/prix</li>
-                <li>✓ Mode projection inclus</li>
-              </ul>
-
-              <button 
-                onClick={() => trackEvent("cta_click", { button: "pricing_pro" })}
-                className="w-full bg-yellow-500 hover:bg-yellow-400 text-black py-2 rounded-lg text-sm font-semibold"
-              >
-                Choisir Pro
-              </button>
-            </div>
-
-            {/* BUSINESS */}
-            <div className="border rounded-3xl p-6 text-center shadow-sm">
-              <h3 className="text-lg font-semibold mb-2">Business</h3>
-              <p className="text-2xl font-bold mb-2">49€</p>
-              <p className="text-gray-600 text-sm mb-4">100 crédits</p>
-
-              <ul className="text-xs text-gray-600 mb-6 space-y-1">
-                <li>✓ 100 transformations</li>
-                <li>✓ Idéal gros volumes</li>
-                <li>✓ Utilisation intensive</li>
-              </ul>
-
-              <button 
-                onClick={() => trackEvent("cta_click", { button: "pricing_business" })}
-                className="w-full bg-black text-white py-2 rounded-lg text-sm"
-              >
-                Choisir Business
               </button>
             </div>
           </div>
 
           <div className="text-center mt-10">
             <p className="text-gray-600 text-sm">
-              1 image gratuite • Payez seulement si vous aimez
+              1 image offerte • Payez seulement si vous souhaitez continuer
             </p>
           </div>
         </div>
       </section>
 
-      <div id="account" className="max-w-md mx-auto mt-10 px-4">
-        <CreditsBalance />
-      </div>
-
-      {/* 5. TÉMOIGNAGES AMÉLIORÉS */}
-      <section id="temoignages" className="bg-gray-50 py-20 px-6">
+      {/* TEMOIGNAGES */}
+      <section className="bg-gray-50 py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-              Ils ont transformé leur bien en coup de cœur
+            <p className="text-sm font-semibold uppercase tracking-wider text-yellow-600 mb-3">
+              Témoignages
+            </p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+              Ils voient immédiatement le potentiel du bien
             </h2>
-            
-            {/* Preuve sociale supplémentaire */}
-            <div className="flex justify-center gap-6 mb-8 text-sm">
-              <div className="flex items-center gap-1 text-yellow-500">
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-              </div>
-              <span className="text-gray-600 font-medium">4.9/5 sur 127 avis</span>
-              <span className="text-green-600 font-bold">✓ Vérifiés</span>
-            </div>
+            <p className="text-lg text-gray-600">
+              LR Homestaging aide particuliers et professionnels à rendre leurs annonces plus attractives.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-lg transition">
-              <div className="flex items-center gap-1 text-yellow-500 mb-4">
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-              </div>
-
+            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+              <div className="text-yellow-500 mb-4">★★★★★</div>
               <p className="text-gray-700 mb-6 leading-relaxed">
-                "Le rendu projection a permis à mes acheteurs de se projeter immédiatement. Vendu en 2 semaines au-dessus du prix estimé !"
+                "Le rendu a permis de mieux visualiser le potentiel du bien dès la première visite."
               </p>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-gray-900">Marie L.</p>
-                  <p className="text-sm text-gray-500">Vendeur à La Rochelle</p>
-                </div>
-                <div className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-bold">
-                  VENDU
-                </div>
-              </div>
+              <p className="font-semibold">Propriétaire vendeur</p>
             </div>
 
-            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-lg transition">
-              <div className="flex items-center gap-1 text-yellow-500 mb-4">
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-              </div>
-
+            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+              <div className="text-yellow-500 mb-4">★★★★★</div>
               <p className="text-gray-700 mb-6 leading-relaxed">
-                "En tant qu'agence, cet outil a révolutionné notre approche. Les clients signent 3x plus vite avec les visuels projection."
+                "Les visuels avant/après rendent l'annonce beaucoup plus attractive et convaincante."
               </p>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-gray-900">Thomas B.</p>
-                  <p className="text-sm text-gray-500">Agent immobilier</p>
-                </div>
-                <div className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-bold">
-                  PRO
-                </div>
-              </div>
+              <p className="font-semibold">Professionnel de l'immobilier</p>
             </div>
 
-            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm hover:shadow-lg transition">
-              <div className="flex items-center gap-1 text-yellow-500 mb-4">
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-                <span>★</span>
-              </div>
-
+            <div className="bg-white rounded-3xl p-8 border border-gray-200 shadow-sm">
+              <div className="text-yellow-500 mb-4">★★★★★</div>
               <p className="text-gray-700 mb-6 leading-relaxed">
-                "J'ai projeté mon canapé et ma table dans l'appartement. Parfait ! J'ai signé sans hésiter grâce à cette vision."
+                "La projection avec les meubles du client apporte une vraie valeur perçue au bien."
               </p>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-gray-900">Lucas D.</p>
-                  <p className="text-sm text-gray-500">Acheteur</p>
-                </div>
-                <div className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-bold">
-                  CLIENT
-                </div>
-              </div>
+              <p className="font-semibold">Investisseur immobilier</p>
             </div>
-          </div>
-
-          {/* CTA intermédiaire */}
-          <div className="text-center mt-12">
-            <p className="text-lg text-gray-700 mb-4">
-              Rejoignez les 127 clients qui ont déjà transformé leur bien
-            </p>
-            <a
-              href="#projection"
-              onClick={() => trackEvent("cta_click", { button: "testimonials_cta" })}
-              className="inline-block bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-8 py-4 rounded-xl transition transform hover:scale-105"
-            >
-              🚀 Tester votre photo maintenant
-            </a>
           </div>
         </div>
       </section>
 
-      {/* 6. CTA FINAL ULTRA-RENFORCÉ */}
+      {/* AGENCES */}
+      <section id="agences" className="bg-gray-950 text-white py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-4xl mx-auto mb-16">
+            <p className="text-sm font-semibold uppercase tracking-wider text-yellow-400 mb-3">
+              Solution pour agences immobilières
+            </p>
+
+            <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight">
+              La solution IA qui valorise vos annonces et aide vos acheteurs à se projeter
+            </h2>
+
+            <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
+              Créez des visuels attractifs, réalistes et différenciants pour vendre plus vite et renforcer votre image d'agence.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
+            <div className="rounded-3xl bg-white/5 border border-white/10 p-6">
+              <h3 className="text-xl font-semibold mb-3">Valorisez vos mandats</h3>
+              <p className="text-gray-300">
+                Donnez plus d'impact à un bien vide, ancien ou difficile à vendre.
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-white/5 border border-white/10 p-6">
+              <h3 className="text-xl font-semibold mb-3">Aidez à se projeter</h3>
+              <p className="text-gray-300">
+                Un visuel immersif rend les visites plus concrètes et plus efficaces.
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-white/5 border border-white/10 p-6">
+              <h3 className="text-xl font-semibold mb-3">Renforcez votre image</h3>
+              <p className="text-gray-300">
+                Proposez une expérience moderne et différenciante face à la concurrence.
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-white/5 border border-white/10 p-6">
+              <h3 className="text-xl font-semibold mb-3">Projetez les meubles clients</h3>
+              <p className="text-gray-300">
+                Permettez à vos acheteurs de visualiser le bien avec leur propre univers.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-5xl mx-auto text-center">
-          <p className="text-sm font-bold uppercase tracking-wider text-yellow-400 mb-3 animate-pulse">
-            🔥 DERNIÈRE CHANCE - OFFRE EXPIRE BIENTÔT
+          <p className="text-sm font-semibold uppercase tracking-wider text-yellow-400 mb-3">
+            Passez à l'action
           </p>
 
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Transformez votre bien en coup de cœur maintenant
+            Testez votre photo maintenant et déclenchez le coup de cœur
           </h2>
 
           <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Rejoignez les 127 propriétaires qui ont déjà vendu leur bien plus vite grâce à la projection visuelle.
+            Un visuel plus attractif peut changer la perception d'un bien en quelques secondes.
+            Faites l'essai gratuitement et voyez la différence.
           </p>
-
-          {/* Preuve sociale finale */}
-          <div className="flex justify-center gap-6 mb-8 text-sm text-gray-300">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-yellow-400">+127</span>
-              <span>biens vendus</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-yellow-400">2x</span>
-              <span>plus vite</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-yellow-400">15%</span>
-              <span>au-dessus du prix</span>
-            </div>
-          </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
             <a
-              href="#projection"
-              onClick={() => trackEvent("cta_click", { button: "final_cta_urgent" })}
-              className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-10 py-5 rounded-xl text-lg transition transform hover:scale-105 shadow-lg"
+              href="#generate"
+              className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-8 py-4 rounded-xl transition"
             >
-              🚀 Tester votre photo MAINTENANT
+              Tester votre photo maintenant
             </a>
 
             <a
               href="#pricing"
-              onClick={() => trackEvent("cta_click", { button: "final_cta_packs" })}
               className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-8 py-4 rounded-xl transition"
             >
-              Voir les packs
+              Choisir mon pack
             </a>
           </div>
 
           <p className="text-sm text-gray-400">
-            ⚡ 1 image offerte • Offre limitée • Résultats garantis
+            1 image offerte • Idéal pour particuliers, agences et investisseurs
           </p>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer id="contact" className="bg-gray-900 text-white py-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <Image src="/logo/logo blanc.jpg" alt="LR HomeStaging" width={140} height={50} className="mb-4" />
-              <p className="text-gray-400">Votre expert en home staging à La Rochelle</p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4">Contact</h3>
-              <p className="mb-2"> 06 12 34 56 78</p>
-              <p className="mb-2"> contact@lr-homestaging.fr</p>
-              <p> La Rochelle, France</p>
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-4">Liens utiles</h3>
-              <div className="space-y-2">
-                <a href="#demo" className="block hover:text-yellow-400 transition">Avant / Après</a>
-                <a href="#pricing" className="block hover:text-yellow-400 transition">Tarifs</a>
-                <a href="/studio" className="block hover:text-yellow-400 transition">Outil IA</a>
-                <a href="#contact" className="block hover:text-yellow-400 transition">Contact</a>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 LR HomeStaging. Tous droits réservés.</p>
+      <footer className="bg-white border-t border-gray-200 py-10 px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-gray-500">
+            © {new Date().getFullYear()} LR Homestaging — Tous droits réservés
+          </p>
+
+          <div className="flex gap-6 text-sm text-gray-600">
+            <a href="#agences" className="hover:text-yellow-600 transition">
+              Agences
+            </a>
+            <a href="#pricing" className="hover:text-yellow-600 transition">
+              Tarifs
+            </a>
+            <a href="#generate" className="hover:text-yellow-600 transition">
+              Tester
+            </a>
           </div>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }
