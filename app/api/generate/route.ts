@@ -31,13 +31,9 @@ async function refundCredit(userId: string) {
 
   if (!existingUser) return;
 
-  // @ts-ignore
-  // @ts-ignore
-  // @ts-ignore
-  // @ts-ignore
-  await supabaseAdmin
+  await (supabaseAdmin as any)
     .from("users")
-    .update({ credits: (existingUser.credits as number || 0) + 1 })
+    .update({ credits: ((existingUser as any).credits || 0) + 1 })
     .eq("id", userId);
 }
 
@@ -125,8 +121,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // @ts-ignore
-    if (!currentUser || (currentUser.credits as number) <= 0) {
+    if (!currentUser || (currentUser as any).credits <= 0) {
       return NextResponse.json(
         { error: "Crédits insuffisants. Choisissez un pack pour continuer.", needsUpgrade: true },
         { status: 402 }
@@ -239,8 +234,7 @@ Make the room attractive, warm, and credible for buyers.
       );
     }
 
-    // @ts-ignore
-    const { error: creditError } = await supabaseAdmin.rpc("consume_credit", {
+    const { error: creditError } = await (supabaseAdmin as any).rpc("consume_credit", {
       p_user_id: user.id,
     });
 

@@ -56,14 +56,13 @@ export async function POST(req: NextRequest) {
           .single();
 
         if (existingUser) {
-          // @ts-ignore
-          await supabaseAdmin
+          await (supabaseAdmin as any)
             .from("users")
             .update({
-              credits: (existingUser.credits as number || 0) + creditsToAdd,
+              credits: ((existingUser as any).credits || 0) + creditsToAdd,
               stripe_customer_id: session.customer?.toString() || null,
               updated_at: new Date().toISOString(),
-            } as any)
+            })
             .eq("id", userId);
 
           return NextResponse.json({ received: true });
@@ -78,15 +77,14 @@ export async function POST(req: NextRequest) {
           .single();
 
         if (existingByEmail) {
-          // @ts-ignore
-          await supabaseAdmin
+          await (supabaseAdmin as any)
             .from("users")
             .update({
-              credits: (existingByEmail.credits as number || 0) + creditsToAdd,
+              credits: ((existingByEmail as any).credits || 0) + creditsToAdd,
               stripe_customer_id: session.customer?.toString() || null,
               updated_at: new Date().toISOString(),
             })
-            .eq("id", existingByEmail.id as string);
+            .eq("id", (existingByEmail as any).id);
         }
       }
     }
