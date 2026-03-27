@@ -6,6 +6,10 @@ type PremiumPaywallProps = {
   imageUrl?: string | null;
 };
 
+const starterPriceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID || "";
+const proPriceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID || "";
+const businessPriceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID || "";
+
 export default function PremiumPaywall({
   title = "Débloquez vos prochaines transformations",
   text = "Vous avez vu le potentiel. Continuez avec un pack de crédits pour générer d’autres visuels premium.",
@@ -34,33 +38,54 @@ export default function PremiumPaywall({
             <h4 className="font-bold text-xl mb-2">Starter</h4>
             <p className="text-gray-300 mb-1">10 crédits</p>
             <p className="text-yellow-400 font-semibold mb-4">9€</p>
-            <StripeCheckoutButton
-              priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID || ""}
-              label="Acheter Starter"
-              className="w-full bg-white text-black hover:bg-gray-100 py-3 rounded-xl font-semibold transition"
-            />
+
+            {starterPriceId ? (
+              <StripeCheckoutButton
+                priceId={starterPriceId}
+                label="Acheter Starter"
+                className="w-full bg-white text-black hover:bg-gray-100 py-3 rounded-xl font-semibold transition"
+              />
+            ) : (
+              <div className="text-sm text-red-300">
+                Pack Starter indisponible
+              </div>
+            )}
           </div>
 
           <div className="rounded-2xl bg-yellow-500/10 p-5 border border-yellow-400/30">
             <h4 className="font-bold text-xl mb-2">Pro</h4>
             <p className="text-gray-300 mb-1">30 crédits</p>
             <p className="text-yellow-400 font-semibold mb-4">19€</p>
-            <StripeCheckoutButton
-              priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID || ""}
-              label="Acheter Pro"
-              className="w-full bg-yellow-500 text-black hover:bg-yellow-400 py-3 rounded-xl font-semibold transition"
-            />
+
+            {proPriceId ? (
+              <StripeCheckoutButton
+                priceId={proPriceId}
+                label="Acheter Pro"
+                className="w-full bg-yellow-500 text-black hover:bg-yellow-400 py-3 rounded-xl font-semibold transition"
+              />
+            ) : (
+              <div className="text-sm text-red-300">
+                Pack Pro indisponible
+              </div>
+            )}
           </div>
 
           <div className="rounded-2xl bg-white/5 p-5 border border-white/10">
             <h4 className="font-bold text-xl mb-2">Business</h4>
             <p className="text-gray-300 mb-1">100 crédits</p>
             <p className="text-yellow-400 font-semibold mb-4">49€</p>
-            <StripeCheckoutButton
-              priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID || ""}
-              label="Acheter Business"
-              className="w-full bg-white text-black hover:bg-gray-100 py-3 rounded-xl font-semibold transition"
-            />
+
+            {businessPriceId ? (
+              <StripeCheckoutButton
+                priceId={businessPriceId}
+                label="Acheter Business"
+                className="w-full bg-white text-black hover:bg-gray-100 py-3 rounded-xl font-semibold transition"
+              />
+            ) : (
+              <div className="text-sm text-red-300">
+                Pack Business indisponible
+              </div>
+            )}
           </div>
         </div>
 
@@ -71,3 +96,4 @@ export default function PremiumPaywall({
     </div>
   );
 }
+

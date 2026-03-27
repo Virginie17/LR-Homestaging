@@ -17,18 +17,26 @@ export default function StripeCheckoutButton({
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
+    if (!priceId) {
+      alert("Offre temporairement indisponible.");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      // 🔐 Vérifie session utilisateur
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
       if (!session?.access_token) {
-        alert("Connectez-vous pour acheter des crédits.");
+        alert("Connectez-vous pour débloquer vos crédits.");
+        setLoading(false);
         return;
       }
 
+      // 🔥 Appel API checkout
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: {
@@ -41,6 +49,7 @@ export default function StripeCheckoutButton({
       const data = await res.json();
 
       if (!res.ok) {
+        console.error("Stripe checkout error:", data);
         throw new Error(data?.error || "Erreur checkout Stripe");
       }
 
@@ -48,10 +57,11 @@ export default function StripeCheckoutButton({
         throw new Error("URL Stripe absente.");
       }
 
+      // 🚀 redirection Stripe
       window.location.href = data.url;
     } catch (error) {
-      console.error(error);
-      alert("Impossible de démarrer le paiement.");
+      console.error("Checkout error:", error);
+      alert("Impossible de lancer le paiement. Réessayez.");
     } finally {
       setLoading(false);
     }
@@ -62,9 +72,9 @@ export default function StripeCheckoutButton({
       type="button"
       onClick={handleCheckout}
       disabled={loading}
-      className={className}
+      className={`${className} ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
     >
-      {loading ? "Redirection..." : label}
+      {loading ? "Redirection vers Stripe..." : label}
     </button>
   );
 }
