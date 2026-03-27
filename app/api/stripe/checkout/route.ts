@@ -1,21 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
-if (!stripeSecretKey) {
-  throw new Error("STRIPE_SECRET_KEY manquante.");
+async function getAuthenticatedUser(req: NextRequest) {
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.replace("Bearer ", "").trim();
+
+  if (!token) return null;
+
+  const {
+    data: { user },
+    error,
+  } = await supabaseAdmin.auth.getUser(token);
+
+  if (error || !user) return null;
+  return user;
 }
-
-if (!baseUrl) {
-  throw new Error("NEXT_PUBLIC_BASE_URL manquante.");
-}
-
-const stripe = new Stripe(stripeSecretKey);
 
 export async function POST(req: NextRequest) {
   try {
+    const user = await getAuthenticatedUser(req);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Vous devez être connecté pour acheter des crédits." },
+        { status: 401 }
+      );
+    }
+
     const { priceId } = await req.json();
 
     if (!priceId) {
@@ -25,8 +40,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const allowedPrices = [
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID,
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID,
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID,
+    ].filter(Boolean);
+
+    if (!allowedPrices.includes(priceId)) {
+      return NextResponse.json(
+        { error: "Prix Stripe invalide." },
+        { status: 400 }
+      );
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      customer_email: user.email || undefined,
+      metadata: {
+        userId: user.id,
+        email: user.email || "",
+        priceId,
+      },
       line_items: [
         {
           price: priceId,

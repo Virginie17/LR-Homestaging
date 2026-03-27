@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import PremiumPaywall from "./PremiumPaywall";
 
 const FREE_TRY_KEY = "lr_homestaging_free_try_used";
 
@@ -54,7 +55,7 @@ export default function HomeStagingGenerator() {
       }
 
       setProgress(currentProgress);
-      setStepIndex((prev) => {
+      setStepIndex(() => {
         const next = Math.floor((currentProgress / 100) * steps.length);
         return Math.min(next, steps.length - 1);
       });
@@ -68,6 +69,7 @@ export default function HomeStagingGenerator() {
     setFile(selected);
     setResult(null);
     setError(null);
+    setPaywallOpen(false);
   };
 
   const handleGenerate = async () => {
@@ -145,7 +147,17 @@ export default function HomeStagingGenerator() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.error || "Erreur lors de la génération.");
+        const message = data?.error || "Erreur lors de la génération.";
+
+        if (
+          message.includes("crédits") ||
+          message.includes("plus de crédits") ||
+          message.includes("acheter")
+        ) {
+          setPaywallOpen(true);
+        }
+
+        throw new Error(message);
       }
 
       if (!data?.imageUrl) {
@@ -155,7 +167,17 @@ export default function HomeStagingGenerator() {
       setResult(data.imageUrl);
       setProgress(100);
     } catch (err: any) {
-      setError(err?.message || "Erreur serveur.");
+      const message = err?.message || "Erreur serveur.";
+
+      if (
+        message.includes("plus de crédits") ||
+        message.includes("acheter des crédits") ||
+        message.includes("utilisée")
+      ) {
+        setPaywallOpen(true);
+      }
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -297,50 +319,11 @@ export default function HomeStagingGenerator() {
             </div>
           </div>
 
-          {paywallOpen && (
-            <div className="mt-8 rounded-3xl bg-black text-white p-6 md:p-8 text-center relative overflow-hidden">
-              <div
-                className="absolute inset-0 opacity-20 bg-cover bg-center blur-sm scale-110"
-                style={{ backgroundImage: `url(${result})` }}
-              />
-              <div className="relative z-10">
-                <p className="text-sm uppercase tracking-wider text-yellow-400 font-semibold mb-3">
-                  Votre image gratuite est prête
-                </p>
-
-                <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                  Débloquez vos prochaines transformations
-                </h3>
-
-                <p className="text-gray-300 max-w-2xl mx-auto mb-6">
-                  Vous avez vu le potentiel. Continuez avec 10 crédits, 30 crédits
-                  ou un pack optimisé pour vendre plus vite.
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <a
-                    href="#pricing"
-                    className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-xl transition"
-                  >
-                    Voir les offres
-                  </a>
-
-                  <a
-                    href="#account"
-                    className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-6 py-3 rounded-xl transition"
-                  >
-                    Créer mon compte
-                  </a>
-                </div>
-
-                <p className="text-sm text-gray-400 mt-4">
-                  1 image offerte • Sans engagement • Résultat premium
-                </p>
-              </div>
-            </div>
-          )}
+          {paywallOpen && <PremiumPaywall imageUrl={result} />}
         </>
       )}
+
+      {!loading && !result && paywallOpen && <PremiumPaywall />}
     </div>
   );
 }

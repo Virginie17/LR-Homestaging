@@ -1,31 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
-import { getSupabaseAdmin } from "@/lib/supabase-admin";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
-function getStripe() {
-  if (!process.env.STRIPE_SECRET_KEY) {
-    throw new Error("STRIPE_SECRET_KEY is required");
-  }
-  return new Stripe(process.env.STRIPE_SECRET_KEY);
-}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 function getCreditsForPrice(priceId: string) {
-  const starterId = process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID;
-  const proId = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID;
-  const businessId = process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID;
+  if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID) {
+    return Number(process.env.STARTER_CREDITS || 10);
+  }
 
-  if (priceId === starterId) return Number(process.env.STARTER_CREDITS || 10);
-  if (priceId === proId) return Number(process.env.PRO_CREDITS || 30);
-  if (priceId === businessId) return Number(process.env.BUSINESS_CREDITS || 100);
+  if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID) {
+    return Number(process.env.PRO_CREDITS || 30);
+  }
+
+  if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID) {
+    return Number(process.env.BUSINESS_CREDITS || 100);
+  }
 
   return 0;
 }
 
 export async function POST(req: NextRequest) {
-  const supabaseAdmin = getSupabaseAdmin();
-  const stripe = getStripe();
   try {
     const signature = req.headers.get("stripe-signature");
+
     if (!signature) {
       return NextResponse.json(
         { error: "Signature Stripe manquante." },
@@ -54,50 +52,80 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ received: true });
       }
 
-      if (userId) {
-        const { data: existingUser } = await supabaseAdmin
+      const { data: existingPurchase } = await supabaseAdmin
+        .from("credit_purchases")
+        .select("id")
+        .eq("stripe_session_id", session.id)
+        .maybeSingle();
+
+      if (existingPurchase) {
+        return NextResponse.json({ received: true });
+      }
+
+      let targetUserId = userId;
+
+      if (!targetUserId && email) {
+        const { data: userByEmail } = await supabaseAdmin
           .from("users")
-          .select("id, credits")
-          .eq("id", userId)
-          .single();
+          .select("id")
+          .eq("email", email)
+          .maybeSingle();
 
-        if (existingUser) {
-          await (supabaseAdmin as any)
-            .from("users")
-            .update({
-              credits: ((existingUser as any).credits || 0) + creditsToAdd,
-              stripe_customer_id: session.customer?.toString() || null,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", userId);
-
-          return NextResponse.json({ received: true });
+        if (userByEmail?.id) {
+          targetUserId = userByEmail.id;
         }
       }
 
-      if (email) {
-        const { data: existingByEmail } = await supabaseAdmin
-          .from("users")
-          .select("id, credits")
-          .eq("email", email)
-          .single();
+      if (!targetUserId) {
+        console.error("Aucun utilisateur trouvé pour attribuer les crédits.");
+        return NextResponse.json({ received: true });
+      }
 
-        if (existingByEmail) {
-          await (supabaseAdmin as any)
-            .from("users")
-            .update({
-              credits: ((existingByEmail as any).credits || 0) + creditsToAdd,
-              stripe_customer_id: session.customer?.toString() || null,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", (existingByEmail as any).id);
+      const { error: purchaseError } = await supabaseAdmin
+        .from("credit_purchases")
+        .insert({
+          user_id: targetUserId,
+          stripe_session_id: session.id,
+          stripe_customer_email:
+            session.customer_details?.email || session.customer_email || email,
+          stripe_price_id: priceId,
+          credits_added: creditsToAdd,
+          amount_total: session.amount_total,
+          currency: session.currency,
+          status: "paid",
+        });
+
+      if (purchaseError) {
+        console.error("Erreur insert credit_purchases", purchaseError);
+        return NextResponse.json(
+          { error: "Erreur enregistrement achat." },
+          { status: 500 }
+        );
+      }
+
+      const { error: addCreditsError } = await supabaseAdmin.rpc(
+        "add_credits",
+        {
+          p_user_id: targetUserId,
+          p_credits: creditsToAdd,
         }
+      );
+
+      if (addCreditsError) {
+        console.error("Erreur add_credits", addCreditsError);
+        return NextResponse.json(
+          { error: "Erreur ajout crédits." },
+          { status: 500 }
+        );
       }
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error("stripe webhook error", error);
-    return NextResponse.json({ error: "Webhook Stripe invalide." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Webhook Stripe invalide." },
+      { status: 400 }
+    );
   }
 }
