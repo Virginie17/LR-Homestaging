@@ -1,53 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/lib/supabase-admin";
-
-async function getAuthenticatedUser(req: NextRequest) {
-  const supabaseAdmin = getSupabaseAdmin();
-  const authHeader = req.headers.get("authorization");
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null;
-  }
-
-  const token = authHeader.replace("Bearer ", "").trim();
-  if (!token) return null;
-
-  const {
-    data: { user },
-    error,
-  } = await supabaseAdmin.auth.getUser(token);
-
-  if (error || !user) return null;
-  return user;
-}
-
-async function refundCredit(userId: string) {
-  const supabaseAdmin = getSupabaseAdmin();
-  const { data: existingUser } = await supabaseAdmin
-    .from("users")
-    .select("credits")
-    .eq("id", userId)
-    .single();
-
-  if (!existingUser) return;
-
-  await (supabaseAdmin as any)
-    .from("users")
-    .update({ credits: ((existingUser as any).credits || 0) + 1 })
-    .eq("id", userId);
-}
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 function extractImageUrl(output: unknown): string | null {
-  if (typeof output === "string" && output.length > 0) {
-    return output;
-  }
+  if (typeof output === "string" && output.length > 0) return output;
 
   if (Array.isArray(output) && output.length > 0) {
     const first = output[0];
 
-    if (typeof first === "string" && first.length > 0) {
-      return first;
-    }
+    if (typeof first === "string" && first.length > 0) return first;
 
     if (
       first &&
@@ -71,35 +31,35 @@ function extractImageUrl(output: unknown): string | null {
   return null;
 }
 
+async function getAuthenticatedUser(req: NextRequest) {
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.replace("Bearer ", "");
+
+  if (!token) return null;
+
+  const {
+    data: { user },
+    error,
+  } = await supabaseAdmin.auth.getUser(token);
+
+  if (error || !user) return null;
+  return user;
+}
+
 export async function POST(req: NextRequest) {
-  let debitedUserId: string | null = null;
-
   try {
-    const supabaseAdmin = getSupabaseAdmin();
-    const replicateApiToken = process.env.REPLICATE_API_TOKEN;
-
-    if (
-      !replicateApiToken ||
-      replicateApiToken === "your_replicate_api_token_here"
-    ) {
-      return NextResponse.json(
-        { error: "REPLICATE_API_TOKEN est manquante ou invalide." },
-        { status: 500 }
-      );
-    }
-
     const user = await getAuthenticatedUser(req);
 
     if (!user) {
       return NextResponse.json(
-        { error: "Vous devez être connecté pour générer une projection." },
+        { error: "Vous devez être connecté pour utiliser cette fonctionnalité." },
         { status: 401 }
       );
     }
 
     const formData = await req.formData();
     const room = formData.get("room");
-    const furnitureFiles = formData.getAll("furniture");
+    const furniture = formData.getAll("furniture");
 
     if (!(room instanceof File)) {
       return NextResponse.json(
@@ -108,90 +68,64 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const validFurnitureFiles = furnitureFiles.filter(
-      (item): item is File => item instanceof File && item.size > 0
+    const validFurniture = furniture.filter(
+      (item): item is File => item instanceof File
     );
 
-    if (validFurnitureFiles.length === 0) {
+    if (validFurniture.length === 0) {
       return NextResponse.json(
-        { error: "Ajoutez au moins une photo de meuble." },
+        { error: "Ajoutez au moins un meuble." },
         { status: 400 }
       );
     }
 
-    const { data: currentUser, error: currentUserError } = await supabaseAdmin
+    const { data: userRow } = await supabaseAdmin
       .from("users")
       .select("credits")
       .eq("id", user.id)
       .single();
 
-    if (currentUserError) {
-      return NextResponse.json(
-        { error: "Impossible de récupérer vos crédits." },
-        { status: 500 }
-      );
-    }
-
-    if (!currentUser || ((currentUser as any).credits || 0) <= 0) {
+    if (!userRow || userRow.credits <= 0) {
       return NextResponse.json(
         { error: "Vous n'avez plus de crédits." },
         { status: 402 }
       );
     }
 
-    const { error: creditError } = await (supabaseAdmin as any).rpc("consume_credit", {
-      p_user_id: user.id,
-    });
+    const roomBase64 = Buffer.from(await room.arrayBuffer()).toString("base64");
+    const roomDataUri = `data:${room.type || "image/png"};base64,${roomBase64}`;
 
-    if (creditError) {
-      const isNoCredits = creditError.message?.includes("NO_CREDITS");
-
-      return NextResponse.json(
-        {
-          error: isNoCredits
-            ? "Vous n'avez plus de crédits."
-            : "Impossible de consommer un crédit.",
-        },
-        { status: 402 }
-      );
-    }
-
-    debitedUserId = user.id;
-
-    const roomBuffer = Buffer.from(await room.arrayBuffer());
-    const roomMimeType = room.type || "image/png";
-    const roomDataUri = `data:${roomMimeType};base64,${roomBuffer.toString("base64")}`;
-
-    // MVP: on utilise uniquement le premier meuble
-    const firstFurniture = validFurnitureFiles[0];
-    const furnitureBuffer = Buffer.from(await firstFurniture.arrayBuffer());
-    const furnitureMimeType = firstFurniture.type || "image/png";
-    const furnitureDataUri = `data:${furnitureMimeType};base64,${furnitureBuffer.toString("base64")}`;
+    const furnitureDataUris = await Promise.all(
+      validFurniture.map(async (file) => {
+        const base64 = Buffer.from(await file.arrayBuffer()).toString("base64");
+        return `data:${file.type || "image/png"};base64,${base64}`;
+      })
+    );
 
     const prompt = `
-Create an ultra photorealistic real-estate projection.
-Use the first image as the empty or existing room.
-Use the second image as a furniture reference to place naturally into the room.
-Preserve the room architecture exactly: walls, floor, windows, doors, ceiling, camera angle, and perspective.
-Integrate the furniture with correct scale, realistic placement, matching light direction, shadows, and materials.
-Do not redesign the room structure.
-The final result must look like a premium real-estate photograph, elegant, realistic, and credible for buyers.
+Ultra photorealistic interior furniture projection.
+Preserve EXACT room structure, walls, windows, doors, floor, ceiling and perspective.
+Do not add or remove any structural element.
+Insert the provided furniture into the room naturally and realistically.
+Respect exact proportions, perspective, contact points, shadows and lighting.
+No floating objects, no distortion, no geometry change, no artificial look.
+Create a believable future-home result.
     `.trim();
 
     const replicateResponse = await fetch(
-      "https://api.replicate.com/v1/models/flux-kontext-apps/multi-image-kontext-max/predictions",
+      "https://api.replicate.com/v1/models/black-forest-labs/flux-kontext-max/predictions",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${replicateApiToken}`,
+          Authorization: `Bearer ${process.env.REPLICATE_API_TOKEN}`,
           "Content-Type": "application/json",
           Prefer: "wait",
         },
         body: JSON.stringify({
           input: {
             prompt,
-            image_input_1: roomDataUri,
-            image_input_2: furnitureDataUri,
+            input_image: roomDataUri,
+            reference_images: furnitureDataUris,
             aspect_ratio: "match_input_image",
           },
         }),
@@ -208,55 +142,8 @@ The final result must look like a premium real-estate photograph, elegant, reali
     }
 
     if (!replicateResponse.ok) {
-      if (debitedUserId) {
-        await refundCredit(debitedUserId);
-      }
-
-      console.error("Replicate projection HTTP error:", {
-        status: replicateResponse.status,
-        body: responseText,
-      });
-
       return NextResponse.json(
-        {
-          error:
-            "Erreur côté moteur de projection Replicate. Vérifiez la clé API ou les paramètres envoyés.",
-        },
-        { status: 502 }
-      );
-    }
-
-    if (responseJson?.error) {
-      if (debitedUserId) {
-        await refundCredit(debitedUserId);
-      }
-
-      console.error("Replicate projection error:", responseJson.error);
-
-      return NextResponse.json(
-        { error: "Replicate a retourné une erreur pendant la projection." },
-        { status: 502 }
-      );
-    }
-
-    const predictionStatus = responseJson?.status;
-
-    if (
-      predictionStatus &&
-      predictionStatus !== "succeeded" &&
-      predictionStatus !== "successful"
-    ) {
-      if (debitedUserId) {
-        await refundCredit(debitedUserId);
-      }
-
-      console.error("Replicate projection unexpected status:", responseJson);
-
-      return NextResponse.json(
-        {
-          error:
-            "La projection n'a pas abouti. Réessaie dans quelques instants.",
-        },
+        { error: "Erreur côté moteur de projection." },
         { status: 502 }
       );
     }
@@ -264,31 +151,26 @@ The final result must look like a premium real-estate photograph, elegant, reali
     const imageUrl = extractImageUrl(responseJson?.output);
 
     if (!imageUrl) {
-      if (debitedUserId) {
-        await refundCredit(debitedUserId);
-      }
-
-      console.error("Replicate projection missing output URL:", responseJson);
-
       return NextResponse.json(
-        {
-          error: "Aucune image exploitable n’a été retournée par Replicate.",
-        },
+        { error: "Aucune projection exploitable n’a été retournée." },
         { status: 502 }
+      );
+    }
+
+    const { error: creditError } = await supabaseAdmin.rpc("consume_credit", {
+      p_user_id: user.id,
+    });
+
+    if (creditError) {
+      return NextResponse.json(
+        { error: "Impossible de consommer un crédit." },
+        { status: 500 }
       );
     }
 
     return NextResponse.json({ imageUrl });
   } catch (error) {
-    if (debitedUserId) {
-      await refundCredit(debitedUserId);
-    }
-
     console.error("projection route error", error);
-
-    return NextResponse.json(
-      { error: "Erreur serveur pendant la projection." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
   }
 }

@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 function extractImageUrl(output: unknown): string | null {
-  if (typeof output === "string" && output.length > 0) {
-    return output;
-  }
+  if (typeof output === "string" && output.length > 0) return output;
 
   if (Array.isArray(output) && output.length > 0) {
     const first = output[0];
 
-    if (typeof first === "string" && first.length > 0) {
-      return first;
-    }
+    if (typeof first === "string" && first.length > 0) return first;
 
     if (
       first &&
@@ -47,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const file = formData.get("file");
-    const mode = formData.get("mode") as string || "homeStaging";
+    const mode = formData.get("mode");
 
     if (!(file instanceof File)) {
       return NextResponse.json(
@@ -56,32 +52,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ZERO FRICTION : Pas de vérification de compte
-    // 1 image gratuite SANS inscription
-
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const mimeType = file.type || "image/png";
     const dataUri = `data:${mimeType};base64,${buffer.toString("base64")}`;
 
-    // Prompt optimisé selon le mode
-    const prompt = mode === "projection" 
-      ? `
-Ultra photorealistic interior projection with user's furniture.
-STRICT: Maintain exact room structure, walls, windows, and architectural elements.
-Add realistic furniture placement that respects the existing space and proportions.
-Use natural real-estate photography lighting with soft shadows.
-DO NOT modify walls, windows, or room structure.
-Make the projection credible and emotionally engaging for buyers.
-      `.trim()
-      : `
+    const prompt =
+      mode === "projection"
+        ? `
+Ultra photorealistic interior projection.
+Preserve EXACT room structure, walls, windows, doors, floor, ceiling and perspective.
+Do not add or remove any window or structural element.
+Insert elegant modern furniture in a realistic way, respecting scale, depth and light.
+Natural daylight only from existing windows.
+No distortion, no artificial look, no geometry change.
+Create a realistic future-home feeling.
+          `.trim()
+        : `
 Ultra photorealistic interior home staging.
-Maintain the exact room structure and perspective.
-Add elegant modern furniture with realistic placement and proportions.
-Use natural real-estate photography lighting, soft shadows, and realistic materials.
-Do not distort the room or architecture.
-Make the room attractive, warm, and credible for buyers.
-      `.trim();
+Preserve EXACT room structure, walls, windows, doors, floor, ceiling and perspective.
+Do not add or remove any window or structural element.
+Transform the room into a warm, elegant, realistic real-estate-ready space.
+Natural daylight only from existing windows.
+No distortion, no artificial look, no geometry change.
+          `.trim();
 
     const replicateResponse = await fetch(
       "https://api.replicate.com/v1/models/black-forest-labs/flux-kontext-max/predictions",
@@ -126,10 +120,8 @@ Make the room attractive, warm, and credible for buyers.
     const imageUrl = extractImageUrl(responseJson?.output);
 
     if (!imageUrl) {
-      console.error("Replicate free try missing output:", responseJson);
-
       return NextResponse.json(
-        { error: "Aucune image exploitable n'a été retournée." },
+        { error: "Aucune image exploitable n’a été retournée." },
         { status: 502 }
       );
     }
@@ -137,7 +129,6 @@ Make the room attractive, warm, and credible for buyers.
     return NextResponse.json({ imageUrl });
   } catch (error) {
     console.error("generate-free route error", error);
-
     return NextResponse.json(
       { error: "Erreur serveur pendant la génération." },
       { status: 500 }

@@ -1,182 +1,207 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 const FREE_TRY_KEY = "lr_homestaging_free_try_used";
 
+type Mode = "homeStaging" | "projection";
+
 export default function HomeStagingGenerator() {
+  const [mode, setMode] = useState<Mode>("projection");
   const [file, setFile] = useState<File | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<"homeStaging" | "projection">("projection");
-  const [loadingStep, setLoadingStep] = useState<string>("");
   const [progress, setProgress] = useState(0);
-  const [showPaywall, setShowPaywall] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [paywallOpen, setPaywallOpen] = useState(false);
 
   const previewUrl = useMemo(() => {
     if (!file) return null;
     return URL.createObjectURL(file);
   }, [file]);
 
+  const homeStagingSteps = [
+    "Analyse de la pièce...",
+    "Optimisation de la lumière...",
+    "Ajout du mobilier...",
+    "Finalisation du rendu...",
+  ];
+
+  const projectionSteps = [
+    "Analyse de la pièce...",
+    "Préparation de la projection...",
+    "Insertion du mobilier...",
+    "Ajustement des ombres et proportions...",
+    "Finalisation du rendu...",
+  ];
+
+  const steps = mode === "projection" ? projectionSteps : homeStagingSteps;
+
+  useEffect(() => {
+    if (!loading) {
+      setProgress(0);
+      setStepIndex(0);
+      return;
+    }
+
+    let currentProgress = 0;
+    const timer = setInterval(() => {
+      currentProgress += 7;
+      if (currentProgress >= 95) {
+        currentProgress = 95;
+      }
+
+      setProgress(currentProgress);
+      setStepIndex((prev) => {
+        const next = Math.floor((currentProgress / 100) * steps.length);
+        return Math.min(next, steps.length - 1);
+      });
+    }, 700);
+
+    return () => clearInterval(timer);
+  }, [loading, steps.length]);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0] || null;
-    setFile(selectedFile);
+    const selected = e.target.files?.[0] || null;
+    setFile(selected);
     setResult(null);
     setError(null);
-    setShowPaywall(false);
   };
 
-  const handleUpload = async () => {
+  const handleGenerate = async () => {
     if (!file) {
       setError("Veuillez sélectionner une image.");
       return;
     }
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    const isLoggedIn = Boolean(session?.access_token);
-    const accessToken = session?.access_token || null;
-
-    // Vérifier si l'essai gratuit a déjà été utilisé
-    const hasUsedFree = localStorage.getItem(FREE_TRY_KEY);
-    
     setLoading(true);
     setError(null);
-    setProgress(0);
-    setShowPaywall(false);
-
-    // Simulation des étapes de loading selon le mode
-    const homeStagingSteps = [
-      "🔍 Analyse intelligente de la pièce...",
-      "💡 Optimisation de la lumière naturelle...",
-      "🪑 Ajout du mobilier design tendance...",
-      "✨ Rendu ultra réaliste en cours...",
-      "🎯 Finalisation du coup de cœur..."
-    ];
-
-    const projectionSteps = [
-      "🏗️ Analyse précise des murs et fenêtres...",
-      "📐 Détection de l'espace disponible...",
-      "🛋️ Intégration parfaite de vos meubles...",
-      "🌟 Finalisation de la projection immersive...",
-      "🎉 Votre futur intérieur est prêt..."
-    ];
-
-    const steps = mode === "homeStaging" ? homeStagingSteps : projectionSteps;
-    
-    for (let i = 0; i < steps.length; i++) {
-      setLoadingStep(steps[i]);
-      setProgress(20 + (i * 20));
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+    setResult(null);
+    setPaywallOpen(false);
 
     try {
-      // Non connecté + essai déjà utilisé => paywall (sans re-générer)
-      if (!isLoggedIn && hasUsedFree) {
-        setShowPaywall(true);
-        return;
-      }
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       const formData = new FormData();
       formData.append("file", file);
       formData.append("mode", mode);
 
-      const endpoint = isLoggedIn ? "/api/generate" : "/api/generate-free";
+      if (!user) {
+        const freeTryUsed =
+          typeof window !== "undefined" &&
+          localStorage.getItem(FREE_TRY_KEY) === "true";
 
-      const headers: HeadersInit | undefined = isLoggedIn && accessToken
-        ? { Authorization: `Bearer ${accessToken}` }
-        : undefined;
+        if (freeTryUsed) {
+          setPaywallOpen(true);
+          throw new Error(
+            "Votre image gratuite a déjà été utilisée. Débloquez les crédits pour continuer."
+          );
+        }
 
-      const res = await fetch(endpoint, {
+        const freeRes = await fetch("/api/generate-free", {
+          method: "POST",
+          body: formData,
+        });
+
+        const freeData = await freeRes.json();
+
+        if (!freeRes.ok) {
+          throw new Error(
+            freeData?.error || "Erreur lors de la génération gratuite."
+          );
+        }
+
+        if (!freeData?.imageUrl) {
+          throw new Error("Aucune image générée n’a été retournée.");
+        }
+
+        localStorage.setItem(FREE_TRY_KEY, "true");
+        setResult(freeData.imageUrl);
+        setPaywallOpen(true);
+        setProgress(100);
+        return;
+      }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error("Session introuvable.");
+      }
+
+      const res = await fetch("/api/generate", {
         method: "POST",
-        headers,
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: formData,
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        // Si crédits insuffisants, rediriger vers tarifs
-        if (data?.needsUpgrade) {
-          setError("Crédits insuffisants. Choisissez un pack pour continuer.");
-          // Redirection automatique vers les tarifs après 2 secondes
-          setTimeout(() => {
-            window.location.href = "#pricing";
-          }, 2000);
-          return;
-        }
         throw new Error(data?.error || "Erreur lors de la génération.");
       }
 
       if (!data?.imageUrl) {
-        throw new Error("Aucune image générée n'a été retournée.");
+        throw new Error("Aucune image générée n’a été retournée.");
       }
 
-      // Marquer l'essai gratuit comme utilisé uniquement si non connecté
-      if (!isLoggedIn) {
-        localStorage.setItem(FREE_TRY_KEY, "true");
-      }
-      
-      setProgress(100);
       setResult(data.imageUrl);
-
-      // Après un résultat gratuit, on propose de continuer (paywall intelligent)
-      if (!isLoggedIn) {
-        setShowPaywall(true);
-      }
+      setProgress(100);
     } catch (err: any) {
       setError(err?.message || "Erreur serveur.");
     } finally {
       setLoading(false);
-      setLoadingStep("");
-      setProgress(0);
     }
   };
 
   return (
     <div className="text-black">
-      {/* DOUBLE MODE PRODUIT */}
-      <div className="mb-6">
-        <div className="flex gap-2">
+      <div className="mb-5">
+        <div className="inline-flex rounded-2xl border border-gray-200 bg-gray-50 p-1 gap-1">
           <button
+            type="button"
             onClick={() => setMode("homeStaging")}
-            className={`px-4 py-2 rounded font-medium transition ${
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
               mode === "homeStaging"
                 ? "bg-black text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                : "bg-transparent text-gray-600 hover:bg-white"
             }`}
           >
             Home staging rapide
           </button>
+
           <button
+            type="button"
             onClick={() => setMode("projection")}
-            className={`px-4 py-2 rounded font-medium transition ${
+            className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
               mode === "projection"
-                ? "bg-black text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                ? "bg-yellow-500 text-black"
+                : "bg-transparent text-gray-600 hover:bg-white"
             }`}
           >
             Projection avec mes meubles
           </button>
         </div>
-        <p className="text-sm text-gray-600 mt-2">
-          {mode === "homeStaging" 
-            ? "Transformez votre pièce avec mobilier design et moderne" 
-            : "Projetez vos propres meubles dans votre futur bien"
-          }
-        </p>
       </div>
 
       <div className="mb-4">
-        <strong className="block text-gray-900">
-          Qualité Premium — rendu photo professionnel
+        <strong className="block text-gray-900 text-lg">
+          {mode === "projection"
+            ? "Projection réaliste avec vos meubles"
+            : "Qualité premium — rendu photo professionnel"}
         </strong>
+
         <div className="text-sm text-gray-600 mt-1">
-          1 essai gratuit sans connexion, puis accès par compte et crédits
+          {mode === "projection"
+            ? "Idéal pour visualiser votre futur intérieur avant d’acheter"
+            : "Transformez une pièce vide ou datée en visuel vendeur"}
         </div>
       </div>
 
@@ -194,93 +219,57 @@ export default function HomeStagingGenerator() {
 
       <button
         type="button"
-        onClick={handleUpload}
+        onClick={handleGenerate}
         className="mt-4 w-full px-4 py-3 bg-black text-white rounded-xl font-semibold disabled:opacity-50"
         disabled={loading || !file}
       >
-        {loading ? "Génération..." : "Tester votre photo maintenant"}
+        {loading
+          ? "Génération..."
+          : mode === "projection"
+          ? "Tester avec mes meubles"
+          : "Tester votre photo maintenant"}
       </button>
 
-      {loading && (
-        <div className="mt-4 rounded-2xl border border-gray-200 p-6 bg-gray-50 shadow-lg">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="animate-spin w-5 h-5 border-2 border-black border-t-transparent rounded-full"></div>
-            <p className="text-base font-semibold text-gray-900">{loadingStep}</p>
-          </div>
-          
-          {/* Barre de progression améliorée */}
-          <div className="mb-4">
-            <div className="flex justify-between text-xs text-gray-600 mb-2">
-              <span>Progression</span>
-              <span className="font-bold">{progress}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
-              <div 
-                className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-3 rounded-full transition-all duration-500 ease-out shadow-sm" 
-                style={{width: `${progress}%`}}
+      {!loading && !previewUrl && !result && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          <div>
+            <p className="text-sm font-medium mb-2 text-gray-700">Avant</p>
+            <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
+              <img
+                src="/demo/chambre-avant.jpg"
+                alt="Exemple avant"
+                className="w-full h-56 object-cover"
               />
             </div>
           </div>
 
-          {/* Étapes dynamiques avec emojis */}
-          <div className="bg-white rounded-xl p-4 border border-gray-100">
-            <p className="text-xs font-semibold text-gray-700 mb-3">Étapes en cours :</p>
-            <div className="space-y-2">
-              {mode === "homeStaging" ? (
-                <>
-                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("Analyse") ? "text-black font-bold" : "text-gray-400"}`}>
-                    <span>{loadingStep.includes("Analyse") ? "🔍" : "⭕"}</span>
-                    <span>Analyse intelligente de la pièce</span>
-                  </div>
-                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("Optimisation") ? "text-black font-bold" : "text-gray-400"}`}>
-                    <span>{loadingStep.includes("Optimisation") ? "💡" : "⭕"}</span>
-                    <span>Optimisation de la lumière naturelle</span>
-                  </div>
-                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("mobilier") ? "text-black font-bold" : "text-gray-400"}`}>
-                    <span>{loadingStep.includes("mobilier") ? "🪑" : "⭕"}</span>
-                    <span>Ajout du mobilier design tendance</span>
-                  </div>
-                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("Rendu") ? "text-black font-bold" : "text-gray-400"}`}>
-                    <span>{loadingStep.includes("Rendu") ? "✨" : "⭕"}</span>
-                    <span>Rendu ultra réaliste</span>
-                  </div>
-                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("Finalisation") ? "text-black font-bold" : "text-gray-400"}`}>
-                    <span>{loadingStep.includes("Finalisation") ? "🎯" : "⭕"}</span>
-                    <span>Finalisation du coup de cœur</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("murs") ? "text-black font-bold" : "text-gray-400"}`}>
-                    <span>{loadingStep.includes("murs") ? "🏗️" : "⭕"}</span>
-                    <span>Analyse précise des murs et fenêtres</span>
-                  </div>
-                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("espace") ? "text-black font-bold" : "text-gray-400"}`}>
-                    <span>{loadingStep.includes("espace") ? "📐" : "⭕"}</span>
-                    <span>Détection de l'espace disponible</span>
-                  </div>
-                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("Intégration") ? "text-black font-bold" : "text-gray-400"}`}>
-                    <span>{loadingStep.includes("Intégration") ? "🛋️" : "⭕"}</span>
-                    <span>Intégration parfaite de vos meubles</span>
-                  </div>
-                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("projection") ? "text-black font-bold" : "text-gray-400"}`}>
-                    <span>{loadingStep.includes("projection") ? "🌟" : "⭕"}</span>
-                    <span>Finalisation de la projection immersive</span>
-                  </div>
-                  <div className={`flex items-center gap-2 text-xs ${loadingStep.includes("prêt") ? "text-black font-bold" : "text-gray-400"}`}>
-                    <span>{loadingStep.includes("prêt") ? "🎉" : "⭕"}</span>
-                    <span>Votre futur intérieur est prêt</span>
-                  </div>
-                </>
-              )}
+          <div>
+            <p className="text-sm font-medium mb-2 text-gray-700">Après</p>
+            <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
+              <img
+                src="/demo/chambre-apres.jpg"
+                alt="Exemple après"
+                className="w-full h-56 object-cover"
+              />
             </div>
           </div>
-          
-          {/* Skeleton loading amélioré */}
-          <div className="mt-4">
-            <div className="animate-pulse h-64 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl" />
-            <p className="text-center text-xs text-gray-500 mt-2">Génération en cours...</p>
+        </div>
+      )}
+
+      {loading && (
+        <div className="mt-5 rounded-2xl border border-gray-200 p-4 bg-gray-50">
+          <p className="text-sm text-gray-600 mb-3">{steps[stepIndex]}</p>
+
+          <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-black transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
           </div>
+
+          <p className="text-xs text-gray-500 mt-2">{progress}%</p>
+
+          <div className="animate-pulse h-64 bg-gray-200 rounded-lg mt-4" />
         </div>
       )}
 
@@ -294,7 +283,7 @@ export default function HomeStagingGenerator() {
               <img
                 src={previewUrl}
                 alt="Avant"
-                className="rounded-xl w-full object-cover"
+                className="rounded-xl w-full h-64 object-cover"
               />
             </div>
 
@@ -303,97 +292,54 @@ export default function HomeStagingGenerator() {
               <img
                 src={result}
                 alt="Après"
-                className="rounded-xl w-full object-cover"
+                className="rounded-xl w-full h-64 object-cover"
               />
             </div>
           </div>
 
-          {showPaywall && (
-            <div className="mt-8 rounded-3xl bg-black text-white p-6 md:p-8 text-center">
-              <p className="text-sm uppercase tracking-wider text-yellow-400 font-semibold mb-3">
-                Vous avez vu le potentiel
-              </p>
+          {paywallOpen && (
+            <div className="mt-8 rounded-3xl bg-black text-white p-6 md:p-8 text-center relative overflow-hidden">
+              <div
+                className="absolute inset-0 opacity-20 bg-cover bg-center blur-sm scale-110"
+                style={{ backgroundImage: `url(${result})` }}
+              />
+              <div className="relative z-10">
+                <p className="text-sm uppercase tracking-wider text-yellow-400 font-semibold mb-3">
+                  Votre image gratuite est prête
+                </p>
 
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                Continuez avec vos images
-              </h3>
+                <h3 className="text-2xl md:text-3xl font-bold mb-4">
+                  Débloquez vos prochaines transformations
+                </h3>
 
-              <p className="text-gray-300 max-w-2xl mx-auto mb-6">
-                Débloquez vos prochains rendus premium (et gardez l’accès à votre historique).
-              </p>
+                <p className="text-gray-300 max-w-2xl mx-auto mb-6">
+                  Vous avez vu le potentiel. Continuez avec 10 crédits, 30 crédits
+                  ou un pack optimisé pour vendre plus vite.
+                </p>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-6">
-                <a
-                  href="#pricing"
-                  className="rounded-2xl border border-white/15 bg-white/10 hover:bg-white/15 p-5 text-left transition"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-bold">Starter</p>
-                    <span className="text-yellow-400 font-extrabold">9€</span>
-                  </div>
-                  <p className="text-sm text-gray-300">10 crédits • Idéal pour tester sur plusieurs pièces</p>
-                </a>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <a
+                    href="#pricing"
+                    className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-xl transition"
+                  >
+                    Voir les offres
+                  </a>
 
-                <a
-                  href="#pricing"
-                  className="rounded-2xl border border-yellow-500/40 bg-yellow-500/10 hover:bg-yellow-500/15 p-5 text-left transition"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-bold">Pro</p>
-                    <span className="text-yellow-400 font-extrabold">19€</span>
-                  </div>
-                  <p className="text-sm text-gray-300">30 crédits • Meilleur rapport qualité/prix</p>
-                </a>
+                  <a
+                    href="#account"
+                    className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-6 py-3 rounded-xl transition"
+                  >
+                    Créer mon compte
+                  </a>
+                </div>
+
+                <p className="text-sm text-gray-400 mt-4">
+                  1 image offerte • Sans engagement • Résultat premium
+                </p>
               </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
-                  href="#pricing"
-                  className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-xl transition"
-                >
-                  Continuer avec mes images
-                </a>
-
-                <a
-                  href="#projection"
-                  className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-6 py-3 rounded-xl transition"
-                >
-                  Essayer la projection meubles
-                </a>
-              </div>
-
-              <p className="text-sm text-gray-400 mt-4">
-                1 image offerte • Sans engagement • Paiement sécurisé
-              </p>
             </div>
           )}
         </>
-      )}
-
-      {!loading && !result && !previewUrl && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div>
-            <p className="text-sm font-medium mb-2 text-gray-700">Avant</p>
-            <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
-              <img
-                src="/demo/demo-avant.jpg"
-                alt="Exemple avant"
-                className="w-full h-auto object-cover"
-              />
-            </div>
-          </div>
-
-          <div>
-            <p className="text-sm font-medium mb-2 text-gray-700">Après</p>
-            <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
-              <img
-                src="/demo/demo-apres.jpg"
-                alt="Exemple après"
-                className="w-full h-auto object-cover"
-              />
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

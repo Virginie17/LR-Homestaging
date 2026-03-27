@@ -11,14 +11,13 @@ type AppUser = {
 export default function CreditsBalance() {
   const [user, setUser] = useState<AppUser | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
-
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [codeSent, setCodeSent] = useState(false);
 
   const fetchCredits = async (userId: string) => {
     const { data, error } = await supabase
@@ -78,7 +77,7 @@ export default function CreditsBalance() {
     };
   }, []);
 
-  const handleSendOtp = async () => {
+  const handleSendCode = async () => {
     setMessage(null);
 
     if (!email.trim()) {
@@ -102,24 +101,19 @@ export default function CreditsBalance() {
       return;
     }
 
-    setOtpSent(true);
-    setMessage("Code envoyé par email. Saisissez-le ci-dessous.");
+    setCodeSent(true);
+    setMessage("Code envoyé. Vérifiez votre boîte mail.");
   };
 
-  const handleVerifyOtp = async () => {
+  const handleVerifyCode = async () => {
     setMessage(null);
 
-    if (!email.trim()) {
-      setMessage("Veuillez entrer votre email.");
+    if (!email.trim() || !otp.trim()) {
+      setMessage("Veuillez entrer votre email et le code reçu.");
       return;
     }
 
-    if (!otp.trim()) {
-      setMessage("Veuillez entrer le code reçu.");
-      return;
-    }
-
-    setLoading(true);
+    setVerifying(true);
 
     const { error } = await supabase.auth.verifyOtp({
       email: email.trim(),
@@ -127,7 +121,7 @@ export default function CreditsBalance() {
       type: "email",
     });
 
-    setLoading(false);
+    setVerifying(false);
 
     if (error) {
       setMessage(error.message);
@@ -144,8 +138,9 @@ export default function CreditsBalance() {
     await supabase.auth.signOut();
     setUser(null);
     setCredits(null);
+    setCodeSent(false);
+    setEmail("");
     setOtp("");
-    setOtpSent(false);
   };
 
   const handleRefresh = async () => {
@@ -156,16 +151,16 @@ export default function CreditsBalance() {
   };
 
   return (
-    <div className="p-4 bg-white rounded shadow max-w-sm mx-auto text-black">
-      <h3 className="font-semibold mb-2">Mon compte</h3>
+    <div className="p-5 bg-white rounded-3xl border border-gray-200 shadow-sm max-w-md mx-auto text-black">
+      <h3 className="font-bold text-xl mb-3">Mon compte</h3>
 
       {user ? (
         <>
-          <p className="mb-2 text-sm">
+          <p className="mb-2 text-sm text-gray-600">
             Connecté : <span className="font-medium">{user.email}</span>
           </p>
 
-          <p className="text-2xl font-bold mb-3">
+          <p className="text-3xl font-bold mb-4">
             {credits ?? 0} crédit{credits === 1 ? "" : "s"}
           </p>
 
@@ -174,7 +169,7 @@ export default function CreditsBalance() {
               type="button"
               onClick={handleRefresh}
               disabled={refreshing}
-              className="px-3 py-2 bg-gray-200 rounded"
+              className="px-3 py-2 bg-gray-200 rounded-xl"
             >
               {refreshing ? "Actualisation..." : "Rafraîchir"}
             </button>
@@ -182,7 +177,7 @@ export default function CreditsBalance() {
             <button
               type="button"
               onClick={handleSignOut}
-              className="px-3 py-2 bg-red-600 text-white rounded"
+              className="px-3 py-2 bg-black text-white rounded-xl"
             >
               Déconnexion
             </button>
@@ -195,17 +190,17 @@ export default function CreditsBalance() {
             placeholder="votre@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 mb-3 border rounded"
+            className="w-full p-3 mb-3 border rounded-xl"
           />
 
-          {!otpSent ? (
+          {!codeSent ? (
             <button
               type="button"
-              onClick={handleSendOtp}
+              onClick={handleSendCode}
               disabled={loading}
-              className="w-full px-3 py-2 bg-black text-white rounded"
+              className="w-full px-3 py-3 bg-black text-white rounded-xl font-semibold"
             >
-              {loading ? "Envoi..." : "Recevoir un code"}
+              {loading ? "Envoi..." : "Recevoir mon code"}
             </button>
           ) : (
             <>
@@ -214,35 +209,23 @@ export default function CreditsBalance() {
                 placeholder="Code reçu par email"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                className="w-full p-2 mt-3 mb-3 border rounded"
+                className="w-full p-3 mt-3 mb-3 border rounded-xl"
               />
 
               <button
                 type="button"
-                onClick={handleVerifyOtp}
-                disabled={loading}
-                className="w-full px-3 py-2 bg-black text-white rounded"
+                onClick={handleVerifyCode}
+                disabled={verifying}
+                className="w-full px-3 py-3 bg-yellow-500 text-black rounded-xl font-semibold"
               >
-                {loading ? "Vérification..." : "Valider le code"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setOtpSent(false);
-                  setOtp("");
-                  setMessage(null);
-                }}
-                className="w-full mt-2 px-3 py-2 bg-gray-200 rounded"
-              >
-                Changer d’email
+                {verifying ? "Vérification..." : "Se connecter"}
               </button>
             </>
           )}
 
-          {message && <p className="mt-2 text-sm text-gray-600">{message}</p>}
+          {message && <p className="mt-3 text-sm text-gray-600">{message}</p>}
 
-          <p className="mt-2 text-xs text-gray-500">
+          <p className="mt-3 text-xs text-gray-500">
             1 crédit gratuit à la création du compte
           </p>
         </>
