@@ -2,11 +2,9 @@
 
 import Image from "next/image";
 import HomeStagingGenerator from "./components/HomeStagingGenerator";
-import ProjectionGenerator from "./components/ProjectionGenerator";
 import CreditsBalance from "./components/CreditsBalance";
-import StripeCheckoutButton from "./components/StripeCheckoutButton";
-import BeforeAfterSlider from "./components/BeforeAfterSlider";
 import Hero from "./components/Hero";
+
 import BeforeAfterPremium from "@/components/home/BeforeAfterPremium";
 import PremiumTransformations from "@/components/home/PremiumTransformations";
 import FurnitureProjectionPremium from "@/components/home/FurnitureProjectionPremium";
@@ -19,8 +17,8 @@ export default function HomePage() {
   return (
     <main className="bg-white text-gray-900">
       {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <a href="#" className="flex items-center gap-3">
             <Image
               src="/images/logo noir.png"
@@ -31,20 +29,20 @@ export default function HomePage() {
             />
           </a>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <a href="#tester" className="hover:text-yellow-600 transition">
+          <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
+            <a href="#tester" className="transition hover:text-yellow-600">
               Tester
             </a>
-            <a href="#avant-apres" className="hover:text-yellow-600 transition">
+            <a href="#avant-apres" className="transition hover:text-yellow-600">
               Avant / Après
             </a>
-            <a href="#projection" className="hover:text-yellow-600 transition">
+            <a href="#projection" className="transition hover:text-yellow-600">
               Vos meubles
             </a>
-            <a href="#pricing" className="hover:text-yellow-600 transition">
+            <a href="#tarifs" className="transition hover:text-yellow-600">
               Tarifs
             </a>
-            <a href="#agences" className="hover:text-yellow-600 transition">
+            <a href="#agences" className="transition hover:text-yellow-600">
               Agences
             </a>
           </nav>
@@ -61,171 +59,47 @@ export default function HomePage() {
       <BeforeAfterPremium />
 
       {/* PROJECTION AVEC MEUBLES */}
-      <FurnitureProjectionPremium />
+      <section id="projection">
+        <FurnitureProjectionPremium />
+      </section>
 
       {/* GÉNÉRATEUR HOME STAGING */}
-      <section id="tester" className="py-20 px-6">
-        <div className="max-w-7xl mx-auto text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+      <section id="tester" className="bg-white px-6 py-20">
+        <div className="mx-auto mb-16 max-w-7xl text-center">
+          <h2 className="mb-6 text-3xl font-bold md:text-4xl">
             Home staging IA : instantané et réaliste
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          <p className="mx-auto max-w-3xl text-lg text-gray-600">
             Une photo suffit pour transformer un bien vide en un espace de vie attractif
           </p>
         </div>
-        <HomeStagingGenerator />
-      </section>
 
-      {/* COMPTE */}
-      <section className="py-10 px-6 bg-white">
-        <div id="account" className="max-w-md mx-auto">
-          <CreditsBalance />
-        </div>
-      </section>
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[1fr_320px]">
+          <div>
+            <HomeStagingGenerator />
+          </div>
 
-      {/* VISUELS PREMIUM */}
-      <section className="py-20 px-6 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Pourquoi choisir notre solution ?
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Une technologie de pointe au service de l'immobilier
-            </p>
-          </div>
-          
-          {/* IMAGE HERO SALON */}
-          <div className="mb-16">
-            <div className="relative w-full h-[400px] rounded-2xl overflow-hidden shadow-xl">
-              <Image
-                src="/images/hero-salon.jpg"
-                alt="Salon transformé par IA"
-                fill
-                className="object-cover"
-              />
+          <aside className="space-y-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+              <h3 className="mb-4 text-lg font-semibold">Votre compte</h3>
+              <CreditsBalance />
             </div>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Image src="/icons/lightning.svg" alt="Rapide" width={32} height={32} />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Ultra rapide</h3>
-              <p className="text-gray-600">
-                Obtenez un résultat professionnel en quelques secondes seulement
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Image src="/icons/realistic.svg" alt="Réaliste" width={32} height={32} />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Hyper réaliste</h3>
-              <p className="text-gray-600">
-                Des rendus qui respectent volumes, murs et perspectives
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Image src="/icons/easy.svg" alt="Simple" width={32} height={32} />
-              </div>
-              <h3 className="text-xl font-semibold mb-3">Facile à utiliser</h3>
-              <p className="text-gray-600">
-                Importez une photo et obtenez un résultat instantanément
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* TÉMOIGNAGES */}
-      <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Ils nous font confiance
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Découvrez les expériences de nos utilisateurs
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-gray-50 rounded-2xl p-6">
-              <div className="flex items-center mb-4">
-                <Image src="/avatars/user1.jpg" alt="Client" width={48} height={48} className="rounded-full mr-3" />
-                <div>
-                  <p className="font-semibold">Marie L.</p>
-                  <p className="text-sm text-gray-500">Agence immobilière</p>
+            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6 shadow-sm">
+              <h3 className="mb-4 text-lg font-semibold">Pourquoi ça fonctionne</h3>
+              <div className="space-y-3">
+                <div className="rounded-xl bg-white px-4 py-3 text-sm text-gray-700">
+                  ✔ Résultat en quelques secondes
+                </div>
+                <div className="rounded-xl bg-white px-4 py-3 text-sm text-gray-700">
+                  ✔ Rendu réaliste et vendeur
+                </div>
+                <div className="rounded-xl bg-white px-4 py-3 text-sm text-gray-700">
+                  ✔ Meilleure projection des visiteurs
                 </div>
               </div>
-              <p className="text-gray-700">
-                "Un outil révolutionnaire ! Nos vendeurs sont conquis par la qualité des visuels générés."
-              </p>
             </div>
-            <div className="bg-gray-50 rounded-2xl p-6">
-              <div className="flex items-center mb-4">
-                <Image src="/avatars/user2.jpg" alt="Client" width={48} height={48} className="rounded-full mr-3" />
-                <div>
-                  <p className="font-semibold">Thomas B.</p>
-                  <p className="text-sm text-gray-500">Investisseur</p>
-                </div>
-              </div>
-              <p className="text-gray-700">
-                "Je gagne un temps fou sur mes projets. Le rendu est toujours impeccable."
-              </p>
-            </div>
-            <div className="bg-gray-50 rounded-2xl p-6">
-              <div className="flex items-center mb-4">
-                <Image src="/avatars/user3.jpg" alt="Client" width={48} height={48} className="rounded-full mr-3" />
-                <div>
-                  <p className="font-semibold">Sophie P.</p>
-                  <p className="text-sm text-gray-500">Particulier</p>
-                </div>
-              </div>
-              <p className="text-gray-700">
-                "J'ai enfin pu visualiser mes meubles dans mon futur appartement. Génial !"
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* AGENCES */}
-      <section id="agences" className="py-20 px-6 bg-gray-50">
-        <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Une solution pour les professionnels
-          </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-12">
-            Agences immobilières, photographes, décorateurs : optimisez votre production
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h3 className="font-semibold mb-3">Gain de temps</h3>
-              <p className="text-gray-600 text-sm">
-                Transformez dizaines de biens en quelques heures au lieu de semaines
-              </p>
-            </div>
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h3 className="font-semibold mb-3">Économies</h3>
-              <p className="text-gray-600 text-sm">
-                Réduisez vos coûts de production de 70% minimum
-              </p>
-            </div>
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h3 className="font-semibold mb-3">Qualité</h3>
-              <p className="text-gray-600 text-sm">
-                Des visuels professionnels et cohérents pour votre marque
-              </p>
-            </div>
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h3 className="font-semibold mb-3">Différenciation</h3>
-              <p className="text-gray-600 text-sm">
-                Proposez une innovation unique à vos clients
-              </p>
-            </div>
-          </div>
+          </aside>
         </div>
       </section>
 
@@ -242,8 +116,8 @@ export default function HomePage() {
       <FinalCtaPremium />
 
       {/* FOOTER */}
-      <footer className="bg-gray-900 text-white py-12 px-6">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-8">
+      <footer className="bg-gray-900 px-6 py-12 text-white">
+        <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-4">
           <div>
             <div className="mb-4">
               <Image
@@ -254,35 +128,67 @@ export default function HomePage() {
                 className="h-auto w-auto"
               />
             </div>
-            <h4 className="font-semibold mb-4">LR Homestaging</h4>
-            <p className="text-gray-400 text-sm">
+            <h4 className="mb-4 font-semibold">LR Homestaging</h4>
+            <p className="text-sm text-gray-400">
               La solution IA pour transformer vos biens immobiliers
             </p>
           </div>
+
           <div>
-            <h4 className="font-semibold mb-4">Produit</h4>
-            <ul className="space-y-2 text-gray-400 text-sm">
-              <li><a href="#tester" className="hover:text-white transition">Home staging</a></li>
-              <li><a href="#projection" className="hover:text-white transition">Projection meubles</a></li>
-              <li><a href="#pricing" className="hover:text-white transition">Tarifs</a></li>
+            <h4 className="mb-4 font-semibold">Produit</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li>
+                <a href="#tester" className="transition hover:text-white">
+                  Home staging
+                </a>
+              </li>
+              <li>
+                <a href="#projection" className="transition hover:text-white">
+                  Projection meubles
+                </a>
+              </li>
+              <li>
+                <a href="#tarifs" className="transition hover:text-white">
+                  Tarifs
+                </a>
+              </li>
             </ul>
           </div>
+
           <div>
-            <h4 className="font-semibold mb-4">Support</h4>
-            <ul className="space-y-2 text-gray-400 text-sm">
-              <li><a href="#contact" className="hover:text-white transition">Contact</a></li>
-              <li><a href="#faq" className="hover:text-white transition">FAQ</a></li>
+            <h4 className="mb-4 font-semibold">Support</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li>
+                <a href="#contact" className="transition hover:text-white">
+                  Contact
+                </a>
+              </li>
+              <li>
+                <a href="#faq" className="transition hover:text-white">
+                  FAQ
+                </a>
+              </li>
             </ul>
           </div>
+
           <div>
-            <h4 className="font-semibold mb-4">Légal</h4>
-            <ul className="space-y-2 text-gray-400 text-sm">
-              <li><a href="#privacy" className="hover:text-white transition">Confidentialité</a></li>
-              <li><a href="#terms" className="hover:text-white transition">CGU</a></li>
+            <h4 className="mb-4 font-semibold">Légal</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li>
+                <a href="#privacy" className="transition hover:text-white">
+                  Confidentialité
+                </a>
+              </li>
+              <li>
+                <a href="#terms" className="transition hover:text-white">
+                  CGU
+                </a>
+              </li>
             </ul>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto mt-8 pt-8 border-t border-gray-800 text-center text-gray-400 text-sm">
+
+        <div className="mx-auto mt-8 max-w-7xl border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
           <p>&copy; 2024 LR Homestaging. Tous droits réservés.</p>
         </div>
       </footer>
