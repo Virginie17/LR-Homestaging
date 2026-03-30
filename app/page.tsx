@@ -130,7 +130,8 @@ export default function HomePage() {
             </div>
             <h4 className="mb-4 font-semibold">LR Homestaging</h4>
             <p className="text-sm text-gray-400">
-              La solution IA pour transformer vos biens immobiliers
+              La solution IA pour transformer vos biens immobiliers, faciliter la projection
+              et créer un véritable effet coup de cœur.
             </p>
           </div>
 
@@ -152,20 +153,30 @@ export default function HomePage() {
                   Tarifs
                 </a>
               </li>
+              <li>
+                <a href="#agences" className="transition hover:text-white">
+                  Offre agences
+                </a>
+              </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="mb-4 font-semibold">Support</h4>
+            <h4 className="mb-4 font-semibold">Navigation</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
-                <a href="#contact" className="transition hover:text-white">
-                  Contact
+                <a href="#avant-apres" className="transition hover:text-white">
+                  Avant / Après
                 </a>
               </li>
               <li>
-                <a href="#faq" className="transition hover:text-white">
-                  FAQ
+                <a href="#tester" className="transition hover:text-white">
+                  Tester maintenant
+                </a>
+              </li>
+              <li>
+                <a href="#tarifs" className="transition hover:text-white">
+                  Voir les offres
                 </a>
               </li>
             </ul>
@@ -175,12 +186,12 @@ export default function HomePage() {
             <h4 className="mb-4 font-semibold">Légal</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li>
-                <a href="#privacy" className="transition hover:text-white">
+                <a href="/privacy" className="transition hover:text-white">
                   Confidentialité
                 </a>
               </li>
               <li>
-                <a href="#terms" className="transition hover:text-white">
+                <a href="/terms" className="transition hover:text-white">
                   CGU
                 </a>
               </li>
@@ -189,7 +200,7 @@ export default function HomePage() {
         </div>
 
         <div className="mx-auto mt-8 max-w-7xl border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
-          <p>&copy; 2024 LR Homestaging. Tous droits réservés.</p>
+          <p>&copy; 2026 LR Homestaging. Tous droits réservés.</p>
         </div>
       </footer>
     </main>
