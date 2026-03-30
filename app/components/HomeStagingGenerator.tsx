@@ -258,7 +258,7 @@ export default function HomeStagingGenerator() {
             <p className="text-sm font-medium mb-2 text-gray-700">Avant</p>
             <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
               <img
-                src="/demo/chambre-avant.jpg"
+                src="/chambre avant.png"
                 alt="Exemple avant"
                 className="w-full h-56 object-cover"
               />
@@ -269,7 +269,7 @@ export default function HomeStagingGenerator() {
             <p className="text-sm font-medium mb-2 text-gray-700">Après</p>
             <div className="rounded-xl overflow-hidden border border-gray-200 bg-gray-100">
               <img
-                src="/demo/chambre-apres.jpg"
+                src="/images/chambre-premium.jpg"
                 alt="Exemple après"
                 className="w-full h-56 object-cover"
               />
