@@ -3,14 +3,14 @@ import Stripe from "stripe";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
 if (!stripeSecretKey) {
   throw new Error("STRIPE_SECRET_KEY est manquante.");
 }
 
-if (!baseUrl) {
-  throw new Error("NEXT_PUBLIC_BASE_URL est manquante.");
+if (!siteUrl) {
+  throw new Error("NEXT_PUBLIC_SITE_URL est manquante.");
 }
 
 const stripe = new Stripe(stripeSecretKey);
@@ -26,7 +26,9 @@ async function getAuthenticatedUser(req: NextRequest) {
     error,
   } = await supabaseAdmin.auth.getUser(token);
 
-  if (error || !user) return null;
+  if (error || !user) {
+    return null;
+  }
 
   return user;
 }
@@ -45,9 +47,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const priceId = body?.priceId;
 
-    if (!priceId) {
+    if (!priceId || typeof priceId !== "string") {
       return NextResponse.json(
-        { error: "priceId manquant." },
+        { error: "priceId manquant ou invalide." },
         { status: 400 }
       );
     }
@@ -56,7 +58,6 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID,
       process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID,
       process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID,
-      process.env.NEXT_PUBLIC_STRIPE_PRICE_VENTE_RAPIDE_ID,
     ].filter(Boolean) as string[];
 
     if (!allowedPrices.includes(priceId)) {
@@ -80,8 +81,8 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${baseUrl}/?checkout=success`,
-      cancel_url: `${baseUrl}/?checkout=cancel`,
+      success_url: `${siteUrl}/?checkout=success`,
+      cancel_url: `${siteUrl}/?checkout=cancel`,
     });
 
     if (!session.url) {
