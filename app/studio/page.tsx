@@ -8,58 +8,176 @@ import StripeCheckoutButton from "../components/StripeCheckoutButton";
 import CookieConsent from "../components/CookieConsent";
 import { trackEvent } from "@/lib/analytics";
 
+type CreditPlan = {
+  name: string;
+  label: string;
+  priceId?: string;
+};
+
+const creditPlans: CreditPlan[] = [
+  {
+    name: "Starter",
+    label: "Acheter 10 crédits — 9€",
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID,
+  },
+  {
+    name: "Pro",
+    label: "Acheter 30 crédits — 19€",
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID,
+  },
+  {
+    name: "Business",
+    label: "Acheter 100 crédits — 49€",
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID,
+  },
+];
+
 export default function StudioPage() {
+  const availablePlans = creditPlans.filter((plan) => Boolean(plan.priceId));
+
+  const handleTryNow = () => {
+    trackEvent("cta_click", { button: "studio_try" });
+
+    const generatorSection = document.getElementById("generateurs");
+    if (generatorSection) {
+      generatorSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
-    <div className="font-sans text-gray-900">
-      <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md">
-        <div className="flex items-center gap-4">
-          <Image src="/logo/logo noir.png" alt="LR HomeStaging" width={140} height={50} />
-          <span className="text-sm text-gray-600">Studio</span>
+    <div className="min-h-screen bg-white font-sans text-gray-900">
+      <header className="sticky top-0 z-20 border-b border-stone-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-4">
+            <Image
+              src="/images/logo noir.png"
+              alt="LR Homestaging"
+              width={140}
+              height={50}
+              priority
+            />
+            <span className="rounded-full bg-stone-100 px-3 py-1 text-sm font-medium text-stone-600">
+              Studio
+            </span>
+          </div>
         </div>
       </header>
 
-      <section className="py-12 px-6 text-center bg-gray-50">
-        <h1 className="text-3xl md:text-4xl font-bold">Outils IA LR HomeStaging</h1>
-        <p className="mt-3 text-gray-700">
-          Transformez un intérieur et créez des projections premium. Les générations consomment des crédits.
-        </p>
-        <button
-          onClick={() => trackEvent("cta_click", { button: "studio_try" })}
-          className="mt-6 bg-yellow-500 text-black px-6 py-3 rounded-xl font-semibold"
-        >
-          Tester maintenant
-        </button>
-      </section>
+      <main>
+        <section className="bg-gradient-to-b from-white to-stone-50 px-6 py-14 text-center">
+          <div className="mx-auto max-w-3xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-stone-500">
+              Espace de génération
+            </p>
 
-      <div className="max-w-md mx-auto mt-10 px-4">
-        <CreditsBalance />
-      </div>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-stone-900 md:text-5xl">
+              Générez vos visuels immobiliers avec l’IA
+            </h1>
 
-      <div className="max-w-4xl mx-auto mt-10 px-4">
-        <HomeStagingGenerator />
-      </div>
+            <p className="mt-5 text-base leading-7 text-stone-600 md:text-lg">
+              Transformez un intérieur, améliorez la présentation d’un bien et
+              créez des projections premium. Chaque génération consomme des
+              crédits.
+            </p>
 
-      <div className="max-w-4xl mx-auto mt-10 px-4">
-        <ProjectionGenerator />
-      </div>
+            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <button
+                onClick={handleTryNow}
+                className="rounded-xl bg-stone-900 px-6 py-3 font-semibold text-white transition hover:bg-stone-800"
+              >
+                Tester maintenant
+              </button>
 
-      <div className="max-w-md mx-auto mt-10 space-y-3 px-4">
-        <StripeCheckoutButton
-          priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID || ""}
-          label="Acheter 10 crédits — 9€"
-        />
-        <StripeCheckoutButton
-          priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID || ""}
-          label="Acheter 30 crédits — 19€"
-        />
-        <StripeCheckoutButton
-          priceId={process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID || ""}
-          label="Acheter 100 crédits — 49€"
-        />
-      </div>
+              <a
+                href="#credits"
+                className="rounded-xl border border-stone-300 bg-white px-6 py-3 font-semibold text-stone-900 transition hover:bg-stone-50"
+              >
+                Acheter des crédits
+              </a>
+            </div>
+          </div>
+        </section>
 
-      <footer className="bg-black text-white text-center py-8 px-4 mt-16">
-        <p>© {new Date().getFullYear()} LR HomeStaging</p>
+        <section className="px-4 py-10">
+          <div className="mx-auto max-w-md">
+            <CreditsBalance />
+          </div>
+        </section>
+
+        <section id="generateurs" className="px-4 py-6">
+          <div className="mx-auto max-w-5xl space-y-10">
+            <div className="rounded-3xl border border-stone-200 bg-white p-4 shadow-sm sm:p-6">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-stone-900">
+                  Home staging IA
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-stone-600">
+                  Valorisez un intérieur avec un rendu plus moderne, plus
+                  lumineux et plus attractif.
+                </p>
+              </div>
+              <HomeStagingGenerator />
+            </div>
+
+            <div className="rounded-3xl border border-stone-200 bg-white p-4 shadow-sm sm:p-6">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-stone-900">
+                  Projection avec meubles du client
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-stone-600">
+                  Importez une pièce et projetez les meubles du client pour
+                  l’aider à mieux se projeter dans l’espace.
+                </p>
+              </div>
+              <ProjectionGenerator />
+            </div>
+          </div>
+        </section>
+
+        <section id="credits" className="px-4 py-14">
+          <div className="mx-auto max-w-3xl rounded-3xl border border-stone-200 bg-stone-50 p-6 sm:p-8">
+            <div className="text-center">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-stone-500">
+                Crédits
+              </p>
+              <h2 className="mt-3 text-2xl font-bold text-stone-900 sm:text-3xl">
+                Rechargez vos crédits en quelques clics
+              </h2>
+              <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-stone-600 sm:text-base">
+                Choisissez le pack adapté à votre usage. Les crédits sont
+                utilisables immédiatement après le paiement.
+              </p>
+            </div>
+
+            <div className="mx-auto mt-8 max-w-md space-y-3">
+              {availablePlans.map((plan) =>
+                plan.priceId ? (
+                  <StripeCheckoutButton
+                    key={plan.name}
+                    priceId={plan.priceId}
+                    label={plan.label}
+                    className="w-full rounded-xl bg-stone-900 px-5 py-3 font-semibold text-white transition hover:bg-stone-800"
+                  />
+                ) : null
+              )}
+
+              {availablePlans.length === 0 && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">
+                  Les offres ne sont pas encore disponibles. Vérifie tes
+                  variables d’environnement Stripe.
+                </div>
+              )}
+            </div>
+
+            <p className="mt-6 text-center text-xs text-stone-500">
+              1 crédit = 1 génération d’image
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <footer className="mt-16 bg-black px-4 py-8 text-center text-white">
+        <p>© {new Date().getFullYear()} LR Homestaging</p>
       </footer>
 
       <CookieConsent />

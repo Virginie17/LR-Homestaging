@@ -1,36 +1,47 @@
-import { MetadataRoute } from 'next';
+import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://lr-homestaging.vercel.app";
+
+  const now = new Date();
+
   return [
     {
-      url: 'https://lr-homestaging.vercel.app/',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
+      url: `${siteUrl}/`,
+      lastModified: now,
+      changeFrequency: "weekly",
       priority: 1,
     },
     {
-      url: 'https://lr-homestaging.vercel.app/contact',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
+      url: `${siteUrl}/agences`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
     },
     {
-      url: 'https://lr-homestaging.vercel.app/studio',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
+      url: `${siteUrl}/studio`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.7,
     },
     {
-      url: 'https://lr-homestaging.vercel.app/offres',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
+      url: `${siteUrl}/privacy`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
     },
     {
-      url: 'https://lr-homestaging.vercel.app/form',
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
+      url: `${siteUrl}/terms`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
+    {
+      url: `${siteUrl}/cookies`,
+      lastModified: now,
+      changeFrequency: "yearly",
+      priority: 0.3,
     },
   ];
 }

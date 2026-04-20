@@ -1,27 +1,9 @@
-import { Metadata } from 'next';
-
-import { GoogleTagManager } from '@next/third-parties/google';
-
-export const metadata: Metadata = {
-  title: "Home staging La Rochelle - LR HomeStaging",
-  description: "Vendez votre bien plus vite grâce au home staging à La Rochelle",
-  icons: {
-    icon: '/favicon.png',
-  },
-};
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function Head() {
   return (
-    <html lang="fr">
-      <head>
-        <link rel="icon" href="/favicon.png" />
-        <GoogleTagManager gtmId="G-DEVMODE123" />
-      </head>
-      <body>{children}</body>
-    </html>
+    <>
+      <meta charSet="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="theme-color" content="#ffffff" />
+    </>
   );
 }

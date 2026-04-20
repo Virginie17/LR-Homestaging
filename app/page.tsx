@@ -4,7 +4,7 @@ import Image from "next/image";
 import HomeStagingGenerator from "./components/HomeStagingGenerator";
 import CreditsBalance from "./components/CreditsBalance";
 import Hero from "./components/Hero";
-
+import CheckoutResume from "./components/CheckoutResume";
 import BeforeAfterPremium from "@/components/home/BeforeAfterPremium";
 import PremiumTransformations from "@/components/home/PremiumTransformations";
 import FurnitureProjectionPremium from "@/components/home/FurnitureProjectionPremium";
@@ -16,6 +16,7 @@ import FinalCtaPremium from "@/components/home/FinalCtaPremium";
 export default function HomePage() {
   return (
     <main className="bg-white text-gray-900">
+      <CheckoutResume />
       {/* HEADER */}
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">

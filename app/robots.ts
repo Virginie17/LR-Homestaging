@@ -1,11 +1,18 @@
-import { MetadataRoute } from 'next';
- 
+import { MetadataRoute } from "next";
+
 export default function robots(): MetadataRoute.Robots {
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://lr-homestaging.vercel.app";
+
   return {
-    rules: {
-      userAgent: '*',
-      allow: ['/', '/contact', '/studio', '/offres', '/form'],
-    },
-    sitemap: 'https://lr-homestaging.vercel.app/sitemap.xml',
+    rules: [
+      {
+        userAgent: "*",
+        allow: ["/", "/agences", "/studio", "/privacy", "/terms", "/cookies"],
+        disallow: ["/api/"],
+      },
+    ],
+    sitemap: `${siteUrl}/sitemap.xml`,
+    host: siteUrl,
   };
 }

@@ -1,20 +1,38 @@
 declare global {
   interface Window {
-    gtag?: (...args: any[]) => void;
+    gtag?: (
+      command: "event" | "config",
+      eventName: string,
+      params?: Record<string, unknown>
+    ) => void;
   }
 }
 
-export const trackEvent = (eventName: string, data?: Record<string, any>) => {
-  if (typeof window !== "undefined" && window.gtag) {
-    window.gtag("event", eventName, data);
-  }
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+
+// Vérifie si GA est actif
+const isAnalyticsEnabled = () => {
+  return typeof window !== "undefined" && !!window.gtag && !!GA_ID;
 };
 
-export const trackPageView = (pageName: string) => {
-  if (typeof window !== "undefined" && window.gtag) {
-    window.gtag("config", "G-DEVMODE123", {
-      page_title: pageName,
-      page_location: window.location.href,
-    });
-  }
+// 🔹 Track event (clic, action, etc.)
+export const trackEvent = (
+  eventName: string,
+  data?: Record<string, unknown>
+) => {
+  if (!isAnalyticsEnabled()) return;
+
+  window.gtag!("event", eventName, {
+    ...data,
+  });
+};
+
+// 🔹 Track page view
+export const trackPageView = (pageName?: string) => {
+  if (!isAnalyticsEnabled()) return;
+
+  window.gtag!("config", GA_ID!, {
+    page_title: pageName || document.title,
+    page_location: window.location.href,
+  });
 };

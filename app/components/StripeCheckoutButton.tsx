@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type StripeCheckoutButtonProps = {
@@ -15,28 +16,22 @@ export default function StripeCheckoutButton({
   className = "w-full bg-black hover:bg-gray-800 text-white py-3 rounded-xl font-semibold transition",
 }: StripeCheckoutButtonProps) {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const handleCheckout = async () => {
-    if (!priceId) {
-      alert("Offre temporairement indisponible.");
-      return;
-    }
-
     setLoading(true);
 
     try {
-      // 🔐 Vérifie session utilisateur
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
       if (!session?.access_token) {
-        alert("Connectez-vous pour débloquer vos crédits.");
-        setLoading(false);
+        router.push(`/login?redirect=${encodeURIComponent(pathname)}&priceId=${encodeURIComponent(priceId)}`);
         return;
       }
 
-      // 🔥 Appel API checkout
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: {
@@ -54,14 +49,13 @@ export default function StripeCheckoutButton({
       }
 
       if (!data?.url) {
-        throw new Error("URL Stripe absente.");
+        throw new Error("URL Stripe manquante");
       }
 
-      // 🚀 redirection Stripe
       window.location.href = data.url;
     } catch (error) {
-      console.error("Checkout error:", error);
-      alert("Impossible de lancer le paiement. Réessayez.");
+      console.error(error);
+      alert("Impossible de lancer le paiement.");
     } finally {
       setLoading(false);
     }
@@ -69,12 +63,11 @@ export default function StripeCheckoutButton({
 
   return (
     <button
-      type="button"
       onClick={handleCheckout}
-      disabled={loading}
-      className={`${className} ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
+      disabled={loading || !priceId}
+      className={className}
     >
-      {loading ? "Redirection vers Stripe..." : label}
+      {loading ? "Redirection..." : label}
     </button>
   );
 }

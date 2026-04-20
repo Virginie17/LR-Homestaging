@@ -2,8 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL!;
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
+if (!stripeSecretKey) {
+  throw new Error("STRIPE_SECRET_KEY est manquante.");
+}
+
+if (!baseUrl) {
+  throw new Error("NEXT_PUBLIC_BASE_URL est manquante.");
+}
+
+const stripe = new Stripe(stripeSecretKey);
 
 async function getAuthenticatedUser(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
@@ -17,6 +27,7 @@ async function getAuthenticatedUser(req: NextRequest) {
   } = await supabaseAdmin.auth.getUser(token);
 
   if (error || !user) return null;
+
   return user;
 }
 
@@ -31,7 +42,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { priceId } = await req.json();
+    const body = await req.json();
+    const priceId = body?.priceId;
 
     if (!priceId) {
       return NextResponse.json(
@@ -44,7 +56,8 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER_ID,
       process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO_ID,
       process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS_ID,
-    ].filter(Boolean);
+      process.env.NEXT_PUBLIC_STRIPE_PRICE_VENTE_RAPIDE_ID,
+    ].filter(Boolean) as string[];
 
     if (!allowedPrices.includes(priceId)) {
       return NextResponse.json(
@@ -71,9 +84,17 @@ export async function POST(req: NextRequest) {
       cancel_url: `${baseUrl}/?checkout=cancel`,
     });
 
+    if (!session.url) {
+      return NextResponse.json(
+        { error: "URL Stripe introuvable." },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error("stripe checkout error", error);
+    console.error("stripe checkout error:", error);
+
     return NextResponse.json(
       { error: "Impossible de créer la session de paiement." },
       { status: 500 }
