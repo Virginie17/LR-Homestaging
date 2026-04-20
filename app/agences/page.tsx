@@ -17,7 +17,7 @@ export default function AgencesPage() {
           </p>
 
           <a
-            href="/#pricing"
+            href="/#tarifs"
             className="inline-block bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-8 py-4 rounded-xl transition"
           >
             Voir les offres

@@ -333,14 +333,14 @@ export default function ProjectionGenerator() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="#pricing"
+                href="/#tarifs"
                 className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-6 py-3 rounded-xl transition"
               >
                 Voir les offres
               </a>
 
               <a
-                href="#account"
+                href="/studio#credits"
                 className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-6 py-3 rounded-xl transition"
               >
                 Gérer mes crédits
